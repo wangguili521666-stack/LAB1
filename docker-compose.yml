@@ -2,6 +2,9 @@
 # 业务表由各模块自己的版本化迁移脚本创建，不要写进 db/init/（那里只做「库 + 账号」隔离）。
 services:
   frontend:
+    depends_on:
+      d1:
+        condition: service_healthy
     build:
       context: ./frontend
     init: true
@@ -9,8 +12,9 @@ services:
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
     environment:
-      D1_API_TARGET: ${D1_API_TARGET:-http://host.docker.internal:3004}
-      API_TARGET: ${API_TARGET:-http://host.docker.internal:8080}
+      D1_API_TARGET: http://d1:3004
+      # Other backends/gateway are not implemented; opt in to a real gateway via .env.
+      API_TARGET: ${API_TARGET:-http://127.0.0.1:8080}
       VITE_USE_POLLING: "true"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -24,6 +28,31 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+
+  d1:
+    build:
+      context: ./backend/D1
+    init: true
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: "3004"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_d1
+      DB_USER: d1_app
+      DB_PASSWORD: ${D1_DB_PASSWORD:?请配置 D1_DB_PASSWORD}
+      DB_TIMEZONE: "+08:00"
+      JWT_SECRET: ${D1_JWT_SECRET:?请先运行 ./start.sh 生成登录签名密钥}
+      JWT_EXPIRES_IN: "86400"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3004/api/d1/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
 
   mysql:
     image: mysql:8.0

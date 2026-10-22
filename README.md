@@ -118,54 +118,85 @@ npm run dev
 各后端服务通过环境变量连接自己的库：`DB_HOST=mysql`、`DB_PORT=3306`、`DB_NAME=campus_<模块>`、`DB_USER=<模块>_app`、`DB_PASSWORD=<对应密码>`（勿硬编码、勿用 root）。
 
 
-## 八、通过 Docker 启动前端（本地开发）
+## 八、一键启动（推荐，本地开发）
 
-只需安装并启动 Docker Desktop；前端不再要求本机安装 Node.js / npm。
-在项目根目录执行（首次使用请按第七节准备 `.env`）：
+安装 Docker Desktop 后，在项目目录双击 **start.command**（macOS），
+或在终端执行：
 
 ```bash
-docker compose up -d --build frontend
+./start.sh
 ```
 
-打开 http://localhost:5173。Docker 会自动获取 Node.js 镜像，并根据
-`frontend/package-lock.json` 执行 `npm ci`。依赖安装在镜像内部，
-不会使用或在宿主机生成 `frontend/node_modules`。首次构建需要联网下载镜像和依赖。
-已有的本机依赖目录会被构建忽略，无需删除。
+启动脚本会尝试打开 Docker Desktop，首次运行生成缺失的本地配置和随机密钥，
+然后构建并启动 **MySQL → D1 用户后端 → 前端**。
+数据库健康后，D1 自动执行现有版本化迁移；已执行的迁移会跳过。
+脚本保留已有 `.env`、数据库账号密码和数据卷，不清库或重置密码。
+本机无需安装 Node.js、npm；首次生成配置需要 openssl（macOS 已提供）。
 
-- `frontend/src`、`index.html`、`vite.config.js` 挂载到容器，页面修改支持热更新。
-- 修改 `package.json`、`package-lock.json` 或添加其他顶层资源目录后，重新执行上述启动命令。
-- `docker compose up -d --build` 会一起启动前端与现有 MySQL；不会自动启动后端服务。
-- 这是开发环境，不应直接作为公网生产部署。
-
-常用操作（均在项目根目录执行）：
+启动成功后访问 http://localhost:5173/login，端口如有覆盖，以脚本输出为准。
+配置已经生成后，也可以直接使用：
 
 ```bash
-# 查看前端日志
-docker compose logs -f frontend
-# 在容器中检查构建与认证逻辑
+docker compose up -d --build --wait
+```
+
+**当前仓库仅 D1 有后端实现。** 一键启动覆盖现有可运行服务，
+支持注册、登录、个人资料；M1/M2/M3/D2/D3 尚无后端，相关业务暂不可用。
+没有为这些模块创建占位服务或修改业务页面。
+
+### 登录与首次注册
+
+1. 在项目根目录双击 `start.command`（macOS），或执行 `./start.sh`。
+   等待出现“启动成功”，确保 MySQL、D1 和前端都已就绪。
+2. 浏览器打开 [登录页面](http://localhost:5173/login)。如果修改了 `FRONTEND_PORT`，
+   请使用启动脚本输出的地址。
+3. **首次使用**：点击“创建账号”，填写自己设置的用户名和密码，再点击“创建账号并登录”。
+   昵称、邮箱、手机号和学院 ID 均为选填；不清楚学院 ID 时请留空，填写时必须是数据库中已有的学院。
+   注册成功后会自动登录，新用户默认分配学生角色。
+4. **已有账号**：输入注册时设置的用户名和密码，点击“登录”。普通登录后进入个人中心；
+   如果是访问受保护页面后跳转到登录页，登录成功会返回原页面。
+5. **退出登录**：进入“个人中心”，点击“退出登录”。
+
+项目初始化不会创建默认网站账号，数据库的 `root` / `d1_app` 账号和 `.env` 中的数据库密码
+不能用于网页登录。请自行注册，不要把个人登录密码写进 README 或提交到仓库。
+
+若提示“用户名已存在”，请使用原账号登录或更换用户名；注册成功但自动登录失败时，
+直接使用刚注册的账号重试登录，无需再次注册。
+若页面可以打开但提示服务不可用，在项目根目录检查：
+
+```bash
+docker compose ps
+docker compose logs --tail=80 d1 mysql frontend
+```
+
+三个服务应处于 `healthy` 状态；仅打开前端预览或单独运行前端，不能代替启动 D1 和 MySQL。
+
+### 日常使用
+
+```bash
+# 查看运行状态和日志
+docker compose ps
+docker compose logs -f d1 frontend
+# 停止本项目，保留数据
+docker compose stop
+# 在容器内验证前端
 docker compose run --rm --no-deps frontend npm run build
 docker compose run --rm --no-deps frontend node --test tests/auth.test.mjs
-# 仅停止前端，保留数据库与数据
-docker compose stop frontend
 ```
 
-### 端口与后端连接
+前端 `src`、`index.html`、`vite.config.js` 支持修改后热更新。
+依赖、Dockerfile、D1 后端代码改变后，重新运行 `./start.sh` 即可重建。
+依赖安装在镜像内，不使用本机 `node_modules`，也不需要手动运行 `npm run dev`。
+这是本地开发环境，不应直接作为公网生产部署。
 
-默认前端端口为 5173。如果本机已有开发服务占用该端口，可以在根目录 `.env`
-设置 `FRONTEND_PORT=5174`，再重新启动前端，访问 http://localhost:5174。
+### 端口、后端与已有数据库
 
-前端容器默认通过 `host.docker.internal` 访问本机正在运行的后端：
-`/api/d1` 转发至 3004，其他 `/api` 请求转发至原有 8080 网关。
-**仅启动前端不会使登录或业务接口自动可用**；D1 与其他后端仍需按各自说明启动。
-Linux 下宿主机后端需监听容器可以访问的地址，不能只监听宿主机回环地址。
-
-如果后端之后也接入同一 Compose 网络，可在根目录 `.env` 配置实际服务地址：
-
-```dotenv
-# 以下为可选覆盖项；服务名必须与实际 Compose 服务一致。
-# D1_API_TARGET=http://d1:3004
-# API_TARGET=http://gateway:8080
-```
-
-本机直接运行 `npm run dev` 时仍默认使用原来的 localhost 后端地址。
-Docker 开发模式启用轮询监听，以兼容容器挂载文件的热更新。
+- 前端默认仅监听本机 5173；端口冲突时在 `.env` 设置 `FRONTEND_PORT=5174`。
+- `/api/d1` 通过 Compose 网络连接 `d1:3004`，D1 只使用 `d1_app` 账号连接 `campus_d1`。
+- D1 不发布宿主机端口，浏览器统一通过前端访问接口。
+- 其他 `/api` 不再默认转发到宿主机 8080，以免误连其他项目。
+  后续网关就绪后，在 `.env` 配置 `API_TARGET=http://实际网关地址:端口`。
+- MySQL 端口仍由 `.env` 的 `MYSQL_PORT` 控制；数据保存在原 `mysql_data` 卷中。
+- 已有数据卷不会重新执行首次初始化脚本。若账号密码不一致，应检查原配置和数据库授权，
+  不要通过删除数据卷解决；修改 `.env` 并不会自动修改库内已有密码。
+- `D1_JWT_SECRET` 必须有值，启动脚本会为缺失项生成随机值；不要将 `.env` 提交到仓库。
