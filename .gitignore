@@ -5,5 +5,8 @@
 .DS_Store
 node_modules/
 
+# 构建产物
+dist/
+
 # 日志
 *.log
