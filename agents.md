@@ -15,31 +15,15 @@ D3	公告发布、查询和操作审计	announcements、operation_logs
 
 课程任务书与经组内确认的需求、接口契约是开发依据。任何原文件未确定的功能细节，不得假装已经确定。
 2. 开始任何任务前必须执行
-1. 先阅读本文件、目标模块的 docs/requirements/<module>.md、相关接口在 contracts/openapi.yaml 中的定义，以及涉及的 contracts/schemas/ 文件；数据库任务还须阅读 db/migrations/。
+1. 先阅读本文件、目标模块的 docs/requirements/demands.md、相关接口在 docs/api中定义,数据库任务还须阅读 docs/requirements/databaseDescription.md。
 2. 检查目标模块的现有代码、测试、README 和调用方。不要凭推测认为文件或接口存在。
 3. 用简短计划说明：修改范围、依赖模块、预期行为、验收方式和风险。小型修改可以只用几句话。
 4. 若需求、Schema、OpenAPI 或现有实现冲突，指出冲突并请求负责人员确认；不得自行选定一个版本并悄悄修改其余部分。
 5. 仅修改本次任务需要的文件。不要在无关模块中做顺手重构、批量格式化或重新生成大批文件。
 3. 权威来源与变更顺序
-- docs/requirements/*.md：业务需求、状态转换和验收标准。
-- contracts/openapi.yaml：API 路径、方法、请求/响应及错误码的唯一权威定义。
-- contracts/schemas/：被接口引用的对象结构；如与 OpenAPI 不一致，先提出契约修订，不得静默分叉。
-- docs/decisions/architecture.md：架构、模块归属、边界和已批准的权衡。
-- db/migrations/：数据库结构的实际版本化变更记录；不可把 YAML Schema 误当作 SQL 表结构。
-- db/seed.sql：初始化基础数据，不存放真实业务数据或生产密码。
+- docs/requirements/demands.md：业务需求、状态转换和验收标准。
+- docs/api/：API 路径、方法、请求/响应及错误码的唯一权威定义。
 业务改变时应按需同步修改需求、接口契约、数据库迁移、实现和测试，并在合并请求中说明。修改 API 前须评估前端及跨模块调用方的兼容性。
-4. 仓库结构与模块所有权
-约定的主要路径：
-frontend/src/views/{m1,m2,m3,d1,d2,d3}/
-frontend/src/api/
-backend/{m1,m2,m3,d1,d2,d3}/
-contracts/openapi.yaml
-contracts/schemas/
-docs/requirements/
-docs/decisions/architecture.md
-db/migrations/
-db/seed.sql
-compose.yaml
 - 各模块负责人主要维护各自的后端、前端视图、需求和测试。
 - frontend/src/router/、公共组件、网关、Compose、CI 配置、OpenAPI、全局依赖和数据库迁移规则属于共享资产；修改须经过相关负责人评审。
 - 不得在同一任务中未经授权修改另一个模块的业务代码。确实需要跨模块变更时，先写清依赖和契约变更，分离提交。
