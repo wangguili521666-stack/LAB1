@@ -1,30 +1,44 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '../utils/request.js'
 
-const routes = [
-  { path: '/login', component: () => import('../views/Login.vue') },
-  { path: '/profile', component: () => import('../views/Profile.vue'), meta: { requiresAuth: true } },
-  { path: '/m1', component: () => import('../views/M1.vue'), meta: { requiresAuth: true } },
-  { path: '/m2', component: () => import('../views/M2.vue'), meta: { requiresAuth: true } },
-  { path: '/m3', component: () => import('../views/M3.vue'), meta: { requiresAuth: true } },
-  { path: '/', redirect: '/login' }
-]
-
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes: [
+    {
+      path: '/login',
+      component: () => import('../views/Login.vue'),
+      meta: { title: '登录' },
+    },
+    {
+      path: '/m1',
+      component: () => import('../views/M1.vue'),
+      meta: { title: '座位预约', requiresAuth: true },
+    },
+    {
+      path: '/m2',
+      component: () => import('../views/M2.vue'),
+      meta: { title: '教室申请', requiresAuth: true },
+    },
+    {
+      path: '/m3',
+      component: () => import('../views/M3.vue'),
+      meta: { title: '物业报修', requiresAuth: true },
+    },
+    {
+      path: '/profile',
+      component: () => import('../views/Profile.vue'),
+      meta: { title: '个人中心', requiresAuth: true },
+    },
+    { path: '/:pathMatch(.*)*', redirect: '/m1' },
+  ],
+  scrollBehavior: () => ({ top: 0 }),
 })
-
-// 全局路由守卫：未登录只能访问 /login；已登录访问 /login 时跳回首页
 router.beforeEach((to) => {
-  const authed = !!getToken()
-  if (to.meta.requiresAuth && !authed) {
-    return { path: '/login' }
-  }
-  if (to.path === '/login' && authed) {
-    return { path: '/m1' }
-  }
-  return true
+  if (to.meta.requiresAuth && !getToken())
+    return { path: '/login', query: { redirect: to.fullPath } }
+  if (to.path === '/login' && getToken()) return '/m1'
 })
-
+router.afterEach((to) => {
+  document.title = `${to.meta.title || '首页'} · 校园资源服务平台`
+})
 export default router

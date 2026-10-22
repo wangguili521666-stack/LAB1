@@ -1,39 +1,54 @@
-// 统一 API 请求封装：处理 base、token、统一响应包装 { code, message, data, request_id }。
-const TOKEN_KEY = 'token'
+import { ref } from 'vue'
 
-export function getToken() {
-  return localStorage.getItem(TOKEN_KEY)
+const token = ref(localStorage.getItem('token'))
+export const isAuthenticated = () => !!token.value
+export const getToken = () => token.value
+export function setToken(value) {
+  token.value = value || null
+  if (value) localStorage.setItem('token', value)
+  else localStorage.removeItem('token')
 }
+export const clearToken = () => setToken(null)
+window.addEventListener('storage', (event) => {
+  if (event.key === 'token' || event.key === null)
+    token.value = localStorage.getItem('token')
+})
 
-export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token)
-}
-
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY)
-}
-
-export async function request(path, { method = 'GET', body, auth = true } = {}) {
-  const headers = { 'Content-Type': 'application/json' }
-  if (auth) {
-    const token = getToken()
-    if (token) headers.Authorization = `Bearer ${token}`
+export async function request(
+  path,
+  { method = 'GET', body, auth = true } = {},
+) {
+  const headers = {}
+  const sentToken = getToken()
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (auth && sentToken) headers.Authorization = `Bearer ${sentToken}`
+  let response
+  try {
+    response = await fetch(path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
+    })
+  } catch (error) {
+    throw new Error(
+      error.name === 'TimeoutError'
+        ? '请求超时，请稍后重试'
+        : '无法连接服务，请检查网络后重试',
+    )
   }
-
-  const res = await fetch(path, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body)
-  })
-
-  const json = await res.json().catch(() => null)
-
-  if (!res.ok || !json || json.code !== 'OK') {
-    const err = new Error((json && json.message) || `请求失败（HTTP ${res.status}）`)
-    err.code = json && json.code
-    err.status = res.status
-    throw err
+  const json = await response.json().catch(() => null)
+  if (response.status === 401 && auth && getToken() === sentToken) clearToken()
+  if (!response.ok || json?.code !== 'OK') {
+    const error = new Error(
+      json?.message ||
+        (response.status >= 500
+          ? '服务暂时不可用，请稍后重试'
+          : `请求失败（${response.status}）`),
+    )
+    error.status = response.status
+    error.code = json?.code
+    throw error
   }
-
   return json.data
 }

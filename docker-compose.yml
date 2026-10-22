@@ -1,6 +1,30 @@
 # 六个模块共用一个 MySQL 实例；每个模块一个独立数据库 + 独立账号，互不影响。
 # 业务表由各模块自己的版本化迁移脚本创建，不要写进 db/init/（那里只做「库 + 账号」隔离）。
 services:
+  frontend:
+    build:
+      context: ./frontend
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+    environment:
+      D1_API_TARGET: ${D1_API_TARGET:-http://host.docker.internal:3004}
+      API_TARGET: ${API_TARGET:-http://host.docker.internal:8080}
+      VITE_USE_POLLING: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/index.html:/app/index.html:ro
+      - ./frontend/vite.config.js:/app/vite.config.js:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
   mysql:
     image: mysql:8.0
     container_name: campus-mysql
