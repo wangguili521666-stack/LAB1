@@ -1,0 +1,224 @@
+D1:
+1. users 用户表
+字段	类型	说明
+id	BIGINT PK	用户 ID
+username	VARCHAR(50) UNIQUE	登录用户名
+password_hash	VARCHAR(255)	密码哈希
+nickname	VARCHAR(50)	昵称
+email	VARCHAR(100)	邮箱
+phone	VARCHAR(20)	手机号
+college_id	BIGINT FK	所属学院
+status	VARCHAR(20)	ACTIVE / DISABLED
+created_at	DATETIME	注册时间
+updated_at	DATETIME	更新时间
+
+2. roles 角色表
+字段	类型	说明
+id	BIGINT PK	角色 ID
+role_code	VARCHAR(50) UNIQUE	角色标识
+role_name	VARCHAR(50)	角色名称
+description	VARCHAR(255)	描述
+
+3. user_roles 用户角色关联表
+字段	类型	说明
+user_id	BIGINT FK	用户 ID
+role_id	BIGINT FK	角色 ID
+assigned_at	DATETIME	授权时间
+
+4. permissions 权限表
+字段	类型	说明
+id	BIGINT PK	权限 ID
+permission_code	VARCHAR(100) UNIQUE	权限编码
+description	VARCHAR(255)	权限说明
+
+5. role_permissions 角色权限关联表
+字段	类型	说明
+id_role	BIGINT PK	角色 ID
+id_permissions	BIGINT PK	权限 ID
+
+6. colleges 学院表
+字段	类型	说明
+id	BIGINT PK	学院 ID
+name	VARCHAR(100) UNIQUE	学院名称
+
+D2：
+1. classrooms 教室表
+字段	类型	说明
+id	BIGINT PK	教室 ID
+building	VARCHAR(100)	教学楼
+room_number	VARCHAR(30)	房间号
+college_id	BIGINT FK	所属学院，可空
+capacity	INT	容量
+equipment	JSON	设备信息
+status	VARCHAR(20)	AVAILABLE / MAINTENANCE / DISABLED
+is_bookable_whole	BOOLEAN	是否允许整教室预约
+open_time	TIME	每日开放时间
+close_time	TIME	每日关闭时间
+created_at	DATETIME	创建时间
+
+
+2. seats 座位表
+字段	类型	说明
+id	BIGINT PK	座位 ID
+classroom_id	BIGINT FK	所属教室
+seat_number	VARCHAR(20)	座位编号
+socket_type	VARCHAR(20)	NONE / FIXED / RAIL
+status	VARCHAR(20)	AVAILABLE / MAINTENANCE / DISABLED
+created_at	DATETIME	创建时间
+
+
+3. resource_reservations 统一资源占用表
+这是 M1 与 M2 共享的关键表。
+字段	类型	说明
+id	BIGINT PK	资源占用 ID
+resource_type	VARCHAR(20)	SEAT / CLASSROOM
+resource_id	BIGINT	座位或教室 ID
+classroom_id	BIGINT FK	对应教室 ID
+source_module	VARCHAR(10)	M1 / M2
+source_id	BIGINT	来源业务记录 ID
+start_time	DATETIME	占用开始时间
+end_time	DATETIME	占用结束时间
+status	VARCHAR(20)	HELD / CONFIRMED / RELEASED
+hold_expires_at	DATETIME	预占有效期
+created_at	DATETIME	创建时间
+
+D3：公告与操作日志模块
+1. announcements 公告表
+字段	类型	说明
+id	BIGINT PK	公告 ID
+title	VARCHAR(200)	标题
+content	TEXT	公告内容
+type	VARCHAR(30)	公告类型
+publisher_id	BIGINT FK	发布人
+status	VARCHAR(20)	DRAFT / PUBLISHED / WITHDRAWN
+published_at	DATETIME	发布时间
+expires_at	DATETIME	过期时间
+created_at	DATETIME	创建时间
+updated_at	DATETIME	修改时间
+
+
+2. operation_logs 操作日志表
+字段	类型	说明
+id	BIGINT PK	日志 ID
+user_id	BIGINT NULL	操作用户
+module	VARCHAR(20)	M1 / M2 / M3 / D1 / D2 / D3
+action	VARCHAR(100)	操作类型
+target_type	VARCHAR(50)	操作对象类型
+target_id	BIGINT NULL	操作对象 ID
+request_method	VARCHAR(10)	GET / POST 等
+request_path	VARCHAR(255)	API 路径
+result	VARCHAR(20)	SUCCESS / FAILURE
+ip_address	VARCHAR(45)	客户端 IP
+created_at	DATETIME	操作时间
+
+
+
+
+M1
+1. seat_bookings 座位预约表
+字段	类型	说明
+id	BIGINT PK	预约 ID
+user_id	BIGINT FK	预约学生
+seat_id	BIGINT FK	座位 ID
+reservation_id	BIGINT	D2 资源占用 ID
+start_time	DATETIME	开始时间
+end_time	DATETIME	结束时间
+status	VARCHAR(20)	BOOKED / CHECKED_IN / CANCELLED / NO_SHOW / COMPLETED
+created_at	DATETIME	预约创建时间
+cancelled_at	DATETIME	取消时间
+
+2. seat_checkins 签到记录表
+字段	类型	说明
+id	BIGINT PK	签到 ID
+booking_id	BIGINT FK UNIQUE	对应预约
+checkin_method	VARCHAR(20)	CODE / QR
+checkin_time	DATETIME	签到时间
+
+3. booking_violations 违约记录表
+字段	类型	说明
+id	BIGINT PK	违约 ID
+user_id	BIGINT FK	违约用户
+booking_id	BIGINT FK UNIQUE	对应预约
+violation_type	VARCHAR(30)	NO_SHOW
+occurred_at	DATETIME	违约时间
+
+4. booking_settings 预约配置表
+字段	类型	说明
+setting_key	VARCHAR(50) PK	配置名称
+setting_value	VARCHAR(255)	配置值
+updated_at	DATETIME	更新时间
+
+M2:
+1. classroom_applications 教室申请表
+字段	类型	说明
+id	BIGINT PK	申请 ID
+applicant_id	BIGINT FK	申请人
+classroom_id	BIGINT FK	申请教室
+reservation_id	BIGINT	D2 预占记录 ID
+purpose	VARCHAR(255)	申请用途
+start_time	DATETIME	开始时间
+end_time	DATETIME	结束时间
+status	VARCHAR(30)	PENDING_L1 / PENDING_L2 / APPROVED / REJECTED / CANCELLED / EXPIRED
+approval_deadline	DATETIME	审批截止时间
+created_at	DATETIME	提交时间
+updated_at	DATETIME	更新时间
+
+2. application_approvals 审批记录表
+字段	类型	说明
+id	BIGINT PK	审批 ID
+application_id	BIGINT FK	教室申请 ID
+approval_level	TINYINT	审批级别 1 / 2
+approver_id	BIGINT FK	审批人
+decision	VARCHAR(20)	APPROVED / REJECTED
+comment	TEXT	审批意见或驳回理由
+decided_at	DATETIME	审批时间
+
+
+M3：物业报修工单模块
+1. repair_types 故障类型表
+字段	类型	说明
+id	BIGINT PK	故障类型 ID
+type_name	VARCHAR(50)	电力 / 网络 / 桌椅等
+default_priority	TINYINT	默认优先级
+sla_hours	INT	维修时限
+
+2. repair_tickets 报修工单表
+字段	类型	说明
+id	BIGINT PK	工单 ID
+ticket_number	VARCHAR(50) UNIQUE	唯一工单号
+reporter_id	BIGINT FK	报修用户
+repair_type_id	BIGINT FK	故障类型
+classroom_id	BIGINT FK NULL	故障教室，可空
+location_description	VARCHAR(255)	故障位置
+description	TEXT	故障描述
+priority	TINYINT	当前优先级
+status	VARCHAR(30)	工单状态
+assigned_to	BIGINT FK NULL	维修人员
+assigned_at	DATETIME	派单时间
+deadline_at	DATETIME	维修截止时间
+escalation_count	INT	升级次数
+completed_at	DATETIME	完工时间
+accepted_at	DATETIME	验收时间
+created_at	DATETIME	报修时间
+
+
+3. repair_progress 维修进度表
+字段	类型	说明
+id	BIGINT PK	进度 ID
+ticket_id	BIGINT FK	工单 ID
+operator_id	BIGINT FK	操作用户
+action_type	VARCHAR(30)	ASSIGN / START / UPDATE / FINISH / REWORK / ESCALATE
+old_status	VARCHAR(30)	变更前状态
+new_status	VARCHAR(30)	变更后状态
+description	TEXT	操作说明
+created_at	DATETIME	操作时间
+
+
+4. repair_reviews 维修评价表
+字段	类型	说明
+id	BIGINT PK	评价 ID
+ticket_id	BIGINT FK UNIQUE	工单 ID
+reviewer_id	BIGINT FK	评价用户
+rating	TINYINT	评分 1–5
+comment	TEXT	评价内容
+created_at	DATETIME	评价时间
