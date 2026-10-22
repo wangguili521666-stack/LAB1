@@ -88,7 +88,7 @@ D3：公告与操作日志模块
 id	BIGINT PK	公告 ID
 title	VARCHAR(200)	标题
 content	TEXT	公告内容
-type	VARCHAR(30)	公告类型
+type	VARCHAR(30)	公告类型 NOTICE / MAINTENANCE / EMERGENCY
 publisher_id	BIGINT FK	发布人
 status	VARCHAR(20)	DRAFT / PUBLISHED / WITHDRAWN
 published_at	DATETIME	发布时间
@@ -158,7 +158,7 @@ reservation_id	BIGINT	D2 预占记录 ID
 purpose	VARCHAR(255)	申请用途
 start_time	DATETIME	开始时间
 end_time	DATETIME	结束时间
-status	VARCHAR(30)	PENDING_L1 / PENDING_L2 / APPROVED / REJECTED / CANCELLED / EXPIRED
+status	VARCHAR(30)	PENDING_L1 / PENDING_L2 / APPROVED / REJECTED / CANCELLED
 approval_deadline	DATETIME	审批截止时间
 created_at	DATETIME	提交时间
 updated_at	DATETIME	更新时间
@@ -192,7 +192,7 @@ classroom_id	BIGINT FK NULL	故障教室，可空
 location_description	VARCHAR(255)	故障位置
 description	TEXT	故障描述
 priority	TINYINT	当前优先级
-status	VARCHAR(30)	工单状态
+status	VARCHAR(30)	工单状态 PENDING_ASSIGNMENT / ASSIGNED / IN_PROGRESS / PENDING_ACCEPTANCE / COMPLETED / CANCELLED
 assigned_to	BIGINT FK NULL	维修人员
 assigned_at	DATETIME	派单时间
 deadline_at	DATETIME	维修截止时间
