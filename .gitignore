@@ -1,0 +1,9 @@
+# 密钥与本地配置
+.env
+
+# 系统与依赖
+.DS_Store
+node_modules/
+
+# 日志
+*.log
