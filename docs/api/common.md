@@ -80,6 +80,8 @@ D1	M2	GET /api/m2/applications/me	聚合个人教室申请
 D1	M3	GET /api/m3/tickets/me	聚合个人报修
 M1/M2/M3/D1/D2	D3	POST /api/d3/internal/logs	记录重要操作
 对于 D1 的个人记录聚合，/me 接口在服务间调用时不能简单地把 D1 的服务 Token 当作用户 Token。建议保留经过校验的用户身份上下文，或者补充仅供可信服务调用的按用户 ID 查询接口。
-另外，课程要求的提醒服务尚未分配模块。建议由 D3 所在成员额外实现公共通知接口，例如：
-POST /api/d3/internal/notifications
-请求可统一包含 user_id, channel, template_code, payload，但这属于需要扩展的契约，目前 D3 数据库中没有通知记录表。也可以由 M1 自行完成提醒，不必强行修改 D3 的职责。
+2026-10-23 D3 本地首版补充（按 D3 负责人开发要求，待组内联调评审）：
+M1/M2/M3/D1/D2 → D3：POST /api/d3/internal/notifications，幂等提交站内通知。
+调用方仍负责业务时机、收件人和可靠重试；D3 负责接收、去重、消息历史与已读状态。M1 的取消、违约与资源释放职责不变。
+通知使用 source_event_id、notification_type、recipient_user_ids 等字段，确切契约见 d3.md；此前 user_id/channel/template_code/payload 只是建议格式，未成为已实现接口。
+D3 内部接口使用每模块独立的 X-D3-Service-Token；个人接口使用 D1 的 Bearer 用户令牌。当前只接受 IN_APP，EMAIL/WECHAT 返回明确的未接入错误。

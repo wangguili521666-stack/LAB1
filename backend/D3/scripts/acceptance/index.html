@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="D3 本地验收：通知、个人消息、公告管理和审计查询。">
+  <title>D3 本地验收台</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="./"><span class="brand-mark">D3</span><span>校园资源服务平台<small>本地验收台</small></span></a>
+    <div class="nav-label">业务检查</div>
+    <nav aria-label="验收模块">
+      <button type="button" class="nav-item active" data-tab="notifications" aria-current="page"><span>01</span>通知测试</button>
+      <button type="button" class="nav-item" data-tab="messages"><span>02</span>个人消息</button>
+      <button type="button" class="nav-item" data-tab="announcements"><span>03</span>公告管理</button>
+      <button type="button" class="nav-item" data-tab="logs"><span>04</span>操作审计</button>
+    </nav>
+    <div class="sidebar-note"><span class="small-dot"></span> 本地开发环境<p>真实 MySQL 数据<br>模拟用户与来源模块</p><small>测试记录会保留，重启后仍可查看。</small></div>
+  </aside>
+  <main>
+    <header class="page-header"><div><div class="eyebrow">D3 · LOCAL ACCEPTANCE</div><h1>把每一步操作，变成可见的结果。</h1><p>发送通知、读取消息、管理公告，再核对数据库与审计记录。</p></div><button id="refresh-all" type="button" class="secondary">刷新全部数据</button></header>
+    <section class="connection-bar" aria-label="数据库连接"><span id="connection-status" class="status neutral">正在连接</span><strong>campus_d3_local</strong><span id="database-address">本机 MySQL</span><span class="connection-time" id="checked-at">等待读取数据库</span></section>
+    <section class="metrics" aria-label="数据库记录数">
+      <article><span>通知事件</span><strong id="count-notifications">—</strong><small id="delta-notifications">d3_notifications</small></article>
+      <article><span>用户消息</span><strong id="count-messages">—</strong><small id="delta-messages">d3_notification_recipients</small></article>
+      <article><span>公告</span><strong id="count-announcements">—</strong><small id="delta-announcements">announcements</small></article>
+      <article><span>操作审计</span><strong id="count-logs">—</strong><small id="delta-logs">operation_logs</small></article>
+    </section>
+    <div id="notice" class="notice neutral" role="status" aria-live="polite">正在加载。页面中的写操作会保存到本地数据库。</div>
+
+    <section id="panel-notifications" class="panel">
+      <div class="section-heading"><div><h2>通知测试</h2><p>模拟其他模块提交通知，检查接收、重试去重与失效。</p></div><span class="pill">站内消息 IN_APP</span></div>
+      <div class="split">
+        <form id="notification-form" class="card">
+          <h3>发送一条测试通知</h3>
+          <div class="form-grid"><label>来源模块<select id="notify-module"><option>M1</option><option>M2</option><option>M3</option><option>D1</option><option>D2</option></select></label><label>通知类型<select id="notify-type"><option value="BOOKING_REMINDER">预约提醒</option><option value="APPROVAL_RESULT">审批结果</option><option value="REPAIR_PROGRESS">维修进度</option><option value="SYSTEM_NOTICE">系统通知</option></select></label></div>
+          <fieldset class="recipients"><legend>接收学生</legend><label><input type="checkbox" name="recipient" value="101" checked>学生 101</label><label><input type="checkbox" name="recipient" value="102">学生 102</label></fieldset>
+          <label>通知标题<input id="notify-title" required maxlength="200" value="【本地验收】预约即将开始"></label>
+          <label>通知内容<textarea id="notify-content" required maxlength="10000" rows="3">你的预约即将开始，请按时签到。这是一条本地验收消息。</textarea></label>
+          <div class="form-grid"><label>关联业务编号<input id="notify-biz" required maxlength="64" value="501"></label><label>多少分钟后过期（可留空）<input id="notify-expiry" type="number" min="1" max="525600" placeholder="留空表示不过期"></label></div>
+          <button type="submit" class="primary">发送新通知</button><p class="hint">每次发送生成一个新事件；测试去重请点右侧“原样重试”。</p>
+        </form>
+        <div class="stack"><article class="card"><div class="card-kicker">本次通知</div><h3 id="notification-result-title">等待第一次发送</h3><div id="notification-result" class="muted">发送成功后，这里会显示通知编号、事件编号与接收人数。</div><div class="button-row"><button id="retry-notification" type="button" class="secondary" disabled data-locked="true">原样重试</button><button id="invalidate-notification" type="button" class="secondary" disabled data-locked="true">使通知失效</button></div><p class="hint">重试会使用上次的完整内容。失效保留消息历史，不再计入有效未读。</p></article>
+        <article class="card guide"><h3>建议这样验收</h3><ol><li>发送通知，观察顶部通知和消息数量增加。</li><li>原样重试，确认返回同一编号，记录数不增加。</li><li>进入个人消息，标记已读并观察未读数。</li><li>使通知失效，再查看历史和操作审计。</li></ol><button type="button" class="text-button" data-tab="messages">去查看个人消息 →</button></article></div>
+      </div>
+    </section>
+
+    <section id="panel-messages" class="panel" hidden>
+      <div class="section-heading"><div><h2>个人消息</h2><p>查看详情不会自动已读；再次标记已读应保留首次时间。</p></div><span class="pill green">有效未读 <strong id="unread-count">—</strong></span></div>
+      <div class="card"><form id="messages-filter" class="toolbar"><label>查看身份<select id="message-user"><option value="student-101">学生 101</option><option value="student-102">学生 102</option></select></label><label>已读状态<select id="message-read"><option value="">全部</option><option value="false">未读（含失效历史）</option><option value="true">已读</option></select></label><button type="submit" class="secondary">查询消息</button></form><div id="messages-list" class="record-list"></div><div id="messages-pagination" class="pagination"></div></div>
+    </section>
+
+    <section id="panel-announcements" class="panel" hidden>
+      <div class="section-heading"><div><h2>公告管理</h2><p>使用运营管理员 103。草稿发布后对外可见，撤回后可继续修改。</p></div><button id="new-announcement" type="button" class="secondary">新建草稿</button></div>
+      <div class="split announcement-split">
+        <form id="announcement-form" class="card"><h3 id="announcement-editor-title">新建公告草稿</h3><p id="announcement-version" class="hint">保存草稿后，再从列表发布。</p><label>公告标题<input id="announcement-title" required maxlength="200" value="【本地验收】自习室开放时间调整"></label><label>公告类型<select id="announcement-type"><option value="NOTICE">通知</option><option value="MAINTENANCE">维护</option><option value="EMERGENCY">紧急</option></select></label><label>公告内容<textarea id="announcement-content" required maxlength="10000" rows="5">自习室开放时间调整，请同学们留意。本公告用于本地验收。</textarea></label><label>失效时间（本机时间，可留空）<input id="announcement-expiry" type="datetime-local" step="1"></label><button id="save-announcement" type="submit" class="primary">保存新草稿</button><p class="hint">已发布公告需要先撤回。页面会携带当前版本，旧版本修改将被接口拒绝。</p></form>
+        <div class="stack"><article class="card"><form id="announcements-filter" class="toolbar"><h3>管理列表</h3><label>状态<select id="announcement-status"><option value="">全部状态</option><option value="DRAFT">草稿</option><option value="PUBLISHED">已发布</option><option value="WITHDRAWN">已撤回</option></select></label><button type="submit" class="secondary">查询公告</button></form><div id="announcements-list" class="record-list"></div><div id="announcements-pagination" class="pagination"></div></article><article class="card public-preview"><h3>普通用户看到的公告</h3><p class="hint" id="public-count">直接读取公共公告接口</p><div id="public-announcements" class="record-list"></div></article></div>
+      </div>
+    </section>
+
+    <section id="panel-logs" class="panel" hidden>
+      <div class="section-heading"><div><h2>操作审计</h2><p>使用系统管理员 104 查询。记录包含操作成功、失败和权限拒绝。</p></div><button id="check-log-permission" type="button" class="secondary">验证学生无查询权限</button></div>
+      <div class="card"><form id="logs-filter" class="audit-filter"><label>来源模块<select id="log-module"><option value="">全部模块</option><option>D3</option><option>M1</option><option>M2</option><option>M3</option><option>D1</option><option>D2</option></select></label><label>操作结果<select id="log-result"><option value="">全部结果</option><option value="SUCCESS">成功</option><option value="FAILURE">失败</option><option value="DENIED">权限拒绝</option></select></label><label>操作名称<input id="log-action" maxlength="100" placeholder="如 MESSAGE_READ"></label><label>用户编号<input id="log-user" inputmode="numeric" pattern="[1-9][0-9]*" placeholder="如 101"></label><label>起始时间（含）<input id="log-start" type="datetime-local" step="1"></label><label>结束时间（不含）<input id="log-end" type="datetime-local" step="1"></label><div class="button-row"><button type="submit" class="primary">查询审计</button><button id="reset-logs" type="button" class="secondary">重置筛选</button></div></form><div class="table-scroll"><table><thead><tr><th>记录 / 时间</th><th>模块 / 操作者</th><th>操作 / 目标</th><th>结果</th><th>详情</th></tr></thead><tbody id="logs-list"></tbody></table></div><div id="logs-pagination" class="pagination"></div></div>
+    </section>
+    <details class="response-card"><summary>最近一次操作的接口响应 <span id="response-status">尚未操作</span></summary><pre id="response-json">这里显示真实接口返回的数据，不包含数据库密码或服务凭据。</pre></details>
+    <footer>仅本机使用 · 操作真实落库 · 当前支持站内消息，用户身份为本地模拟 · 数据库时间以北京时间展示</footer>
+  </main>
+  <dialog id="detail-dialog"><div class="dialog-header"><h3 id="detail-title">详情</h3><button id="close-detail" type="button" class="secondary">关闭</button></div><div id="detail-content"></div></dialog>
+</body>
+</html>

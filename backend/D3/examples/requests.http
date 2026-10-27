@@ -1,0 +1,85 @@
+# 在 backend/D3 执行 npm run dev:mock 后使用。
+# 可用支持 .http 的客户端发送；也可将 URL、请求头与 JSON 复制到 Postman。
+# 以下全是假身份；occurred_at 应使用当前真实时间。
+@base = http://127.0.0.1:3006/api/d3
+
+### 健康检查
+GET {{base}}/health
+
+### M1 提交通知：重复原样发送验证去重，换事件时更新 source_event_id
+POST {{base}}/internal/notifications
+Content-Type: application/json
+X-D3-Service-Token: mock-m1-local-only
+
+{
+  "source_event_id": "m1:booking:501:reminder-before:1",
+  "notification_type": "BOOKING_REMINDER",
+  "biz_type": "SEAT_BOOKING",
+  "biz_id": "501",
+  "recipient_user_ids": ["101"],
+  "title": "预约即将开始",
+  "content": "请按时签到。",
+  "occurred_at": "2026-10-23T10:00:00+08:00",
+  "channels": ["IN_APP"]
+}
+
+### 学生查看本人消息
+GET {{base}}/messages/me
+Authorization: Bearer mock-student-101
+
+### 有效未读数
+GET {{base}}/messages/me/unread-count
+Authorization: Bearer mock-student-101
+
+### 用消息列表中的 id 替换 1（不是 notification_id）
+POST {{base}}/messages/me/1/read
+Authorization: Bearer mock-student-101
+Content-Type: application/json
+
+{}
+
+### 用通知接口返回的 id 替换 1
+POST {{base}}/internal/notifications/1/invalidate
+X-D3-Service-Token: mock-m1-local-only
+Content-Type: application/json
+
+{}
+
+### M2 追加审计日志
+POST {{base}}/internal/logs
+X-D3-Service-Token: mock-m2-local-only
+Content-Type: application/json
+
+{
+  "source_event_id": "m2:application:77:approve:1",
+  "user_id": "103",
+  "action": "APPLICATION_APPROVE",
+  "target_type": "CLASSROOM_APPLICATION",
+  "target_id": "77",
+  "result": "SUCCESS"
+}
+
+### 运营管理员创建草稿
+POST {{base}}/announcements
+Authorization: Bearer mock-operator-103
+Content-Type: application/json
+
+{
+  "title": "自习室开放时间调整",
+  "content": "本周五开放时间调整为九点至二十一点。",
+  "type": "NOTICE"
+}
+
+### 用实际公告 ID 和 version 替换下面的 1
+POST {{base}}/announcements/1/publish
+Authorization: Bearer mock-operator-103
+Content-Type: application/json
+
+{"expected_version": 1}
+
+### 公共公告列表
+GET {{base}}/announcements
+
+### 系统管理员查询审计
+GET {{base}}/admin/logs?module=M2&page=1&page_size=20
+Authorization: Bearer mock-admin-104

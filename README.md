@@ -4,16 +4,18 @@
 
 ## 一、模块划分
 
-| 模块 | 职责 | 自有数据表 | 前端 | 后端 |
+下表说明模块职责分工；实际实现与启动方式见后文。
+
+| 模块 | 职责 | 自有数据表 | 前端职责 | 后端职责 |
 |---|---|---|---|---|
 | M1 | 自习座位查询、预约、签到、提醒、违约、历史、统计 | seat_bookings、seat_checkins、booking_violations、booking_settings | ✅ | ✅ |
 | M2 | 整教室申请、权限门槛、两级审批、超时撤销 | classroom_applications、application_approvals | ✅ | ✅ |
 | M3 | 故障报修、派单、进度、超时升级、验收、评价 | repair_types、repair_tickets、repair_progress、repair_reviews | ✅ | ✅ |
 | D1 | 用户、学院、登录、RBAC、资料、个人业务记录聚合 | users、roles、user_roles、permissions、role_permissions、colleges | ❌ | ✅ |
 | D2 | 教室/座位主数据、可用性、冲突检测、资源预占/确认/释放 | classrooms、seats、resource_reservations | ❌ | ✅ |
-| D3 | 公告发布、查询、操作审计 | announcements、operation_logs | ❌ | ✅ |
+| D3 | 通知接收、个人消息与已读、公告管理、操作审计 | d3_notifications、d3_notification_recipients、announcements、operation_logs | ❌ | ✅ |
 
-约定：**M 开头 = 前端 + 后端；D 开头 = 纯后端服务（无前端页面）**。
+约定：**M 开头负责前端与后端；D 开头提供后端服务**。D3 另附仅供本机开发使用的验收页面，不属于正式 Vue 业务页面。
 
 ## 二、架构
 
@@ -140,9 +142,9 @@ npm run dev
 docker compose up -d --build --wait
 ```
 
-**当前仓库仅 D1 有后端实现。** 一键启动覆盖现有可运行服务，
-支持注册、登录、个人资料；M1/M2/M3/D2/D3 尚无后端，相关业务暂不可用。
-没有为这些模块创建占位服务或修改业务页面。
+**当前已有 D1 和 D3 后端实现。** 一键启动仍只包含 MySQL、D1 和前端，
+支持注册、登录、个人资料；D3 的首版接口与本地验收页面需独立启动，见[第九节](#九d3-首版接口与本地验收)。
+M1/M2/M3/D2 尚无后端实现，相关业务暂不可用。
 
 ### 登录与首次注册
 
@@ -200,3 +202,42 @@ docker compose run --rm --no-deps frontend node --test tests/auth.test.mjs
 - 已有数据卷不会重新执行首次初始化脚本。若账号密码不一致，应检查原配置和数据库授权，
   不要通过删除数据卷解决；修改 `.env` 并不会自动修改库内已有密码。
 - `D1_JWT_SECRET` 必须有值，启动脚本会为缺失项生成随机值；不要将 `.env` 提交到仓库。
+
+## 九、D3 首版接口与本地验收
+
+D3 已提供站内通知接收与重试去重、个人消息与已读、通知失效、公告草稿/编辑/发布/撤回、审计追加与筛选查询。接口见 [`docs/api/d3.md`](./docs/api/d3.md)，完整启动、权限、迁移与测试说明见 [`backend/D3/README.md`](./backend/D3/README.md)。通知格式、角色权限及公告 `expected_version` 是首版联调契约，接入共享环境前需组内评审。
+
+### 先用 Mock 对接接口
+
+要求本机 Node.js 22+。从项目根目录执行：
+
+```bash
+cd backend/D3
+npm ci
+npm run dev:mock
+```
+
+默认地址为 http://127.0.0.1:3006/api/d3/health。Mock 使用内存和模拟身份，不需要数据库；重启清空数据。在第二个终端进入 `backend/D3` 后运行 `npm run smoke`，或使用 [`examples/requests.http`](./backend/D3/examples/requests.http) 手动调用接口。
+
+Windows PowerShell 若拦截 `npm.ps1`，将命令中的 `npm` 换成 `npm.cmd`，无需修改系统执行策略。
+
+### 用本地 MySQL 和浏览器验收
+
+本机已运行 MySQL 时，在 `backend/D3` 目录执行：
+
+```bash
+npm run db:setup:local
+npm run dev:local
+```
+
+首次初始化按提示输入本机数据库管理员密码，脚本创建专用的 `campus_d3_local` 库和 `d3_local_app` 账号；已有成功配置会直接检查迁移。应用密码保存在 Git 忽略的 `.env.local`，管理员密码不保存。
+
+打开 **http://127.0.0.1:3106/local/d3/**，即可点击测试通知、学生消息已读、公告管理和审计查询。数据真实写入本地 MySQL，重启保留；身份仍是模拟账号。页面顶部用 SQL 读回记录数，底部可查看接口响应。运行 `npm run db:status:local` 也可检查数据库。
+
+### 接入范围与提交内容
+
+- 正式入口为 `npm start`，从 `.env` 读取团队数据库、可达的 `D1_BASE_URL` 和各模块独立服务凭据，并使用真实 D1 认证。实际团队库表结构和完整服务联调仍需验证。
+- D3 尚未接入根目录 Compose、一键启动及统一前端代理；仅启动根目录脚本不会启动 D3。当前 Compose 的 D1 不发布宿主机端口，宿主机 D3 不能直接假定 `127.0.0.1:3004` 可达。
+- M1/M2/M3 仍负责业务事件、提醒时机和接收人；D3 不改变它们的业务状态。当前只实现站内消息，邮件和微信渠道尚未接入。
+- 可共享 D3 业务代码、迁移脚本、测试、Mock、验收页面、初始化工具、配置模板与锁文件。真实 `.env`/`.env.local`、`node_modules/`、`.local/`、`.mysql-test/` 和数据库运行数据不提交。
+- `npm test` 运行无需 MySQL 的测试；完整隔离 MySQL 测试按 D3 README 执行。不要把跳过的数据库用例计为通过。
