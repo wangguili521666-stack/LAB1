@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>M1 第二阶段 · 模拟接口验收</title>
+    <title>M1 第三阶段 · 模拟接口验收</title>
   </head>
   <body>
     <aside class="preview-banner">
@@ -13,6 +13,11 @@
         >测试场景
         <select id="scenario">
           <option value="success">正常预约</option>
+          <option value="history">历史/签到/复约（测试码 482916）</option>
+          <option value="forbidden">取消无权限</option>
+          <option value="missing">详情不存在</option>
+          <option value="expired-code">签到码过期</option>
+          <option value="personal-refresh-error">操作成功但记录刷新失败</option>
           <option value="empty">没有空闲座位</option>
           <option value="conflict">预约冲突</option>
           <option value="error">服务异常</option>

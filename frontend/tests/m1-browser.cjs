@@ -70,7 +70,9 @@ const output = process.env.M1_QA_OUTPUT || path.resolve("tests/artifacts/m1");
       .click();
     await page.getByRole("dialog").waitFor();
     await page.keyboard.press("Escape");
-    await page.waitForFunction(() => !document.querySelector("dialog").open);
+    await page.waitForFunction(
+      () => !document.querySelector(".m1-dialog").open,
+    );
     assert.equal(
       await page.evaluate(() =>
         document.activeElement.getAttribute("aria-label"),
@@ -106,7 +108,10 @@ const output = process.env.M1_QA_OUTPUT || path.resolve("tests/artifacts/m1");
       .click();
     await page.getByRole("button", { name: "确认预约", exact: true }).click();
     await page.getByRole("alert").filter({ hasText: "已不可预约" }).waitFor();
-    assert.equal(await page.locator("dialog").evaluate((el) => el.open), false);
+    assert.equal(
+      await page.locator(".m1-dialog").evaluate((el) => el.open),
+      false,
+    );
     check("409 conflict closes confirmation and remains actionable");
     await scenario("refresh-error");
     await search(3);

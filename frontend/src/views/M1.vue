@@ -4,17 +4,19 @@ import AppIcon from "../components/AppIcon.vue";
 import Feedback from "../components/Feedback.vue";
 import { m1Api } from "../api/m1.js";
 import { useM1Booking } from "../composables/useM1Booking.js";
-import { formatCampusTime, socketLabels, statusLabels } from "../utils/m1.js";
-const {
-  filters,
-  state,
-  stale,
-  search,
-  select,
-  loadRecords,
-  confirmBooking,
-  cancel,
-} = useM1Booking(m1Api);
+import { formatCampusTime, socketLabels } from "../utils/m1.js";
+import PersonalBookings from "../components/m1/PersonalBookings.vue";
+import { useM1Personal } from "../composables/useM1Personal.js";
+let refreshSeats = async () => true;
+const personal = useM1Personal(m1Api, () => refreshSeats());
+const { filters, state, stale, search, select, confirmBooking } = useM1Booking(
+  m1Api,
+  { refreshRecords: personal.refreshBookings },
+);
+refreshSeats = () => {
+  state.success = "";
+  return state.snapshot ? search() : Promise.resolve(true);
+};
 const dialog = ref(null);
 const resultsHeading = ref(null);
 watch(
@@ -36,9 +38,6 @@ function closeDialog(event) {
     return;
   }
   state.selected = null;
-}
-function cancelRecord(id) {
-  if (window.confirm("确认取消这条预约？取消后座位将重新开放。")) cancel(id);
 }
 </script>
 
@@ -232,59 +231,7 @@ function cancelRecord(id) {
         </article>
       </div>
     </section>
-    <section class="m1-panel m1-records" aria-labelledby="records-title">
-      <div class="m1-section-title">
-        <div>
-          <h2 id="records-title">我的预约</h2>
-          <p>查看最近 20 条记录，成功预约后自动刷新。</p>
-        </div>
-        <button
-          class="m1-secondary"
-          :disabled="state.recordsPending"
-          @click="loadRecords"
-        >
-          {{ state.recordsPending ? "加载中…" : "刷新记录" }}
-        </button>
-      </div>
-      <Feedback
-        :error="state.recordsError ? `记录加载失败：${state.recordsError}` : ''"
-      /><Feedback :error="state.cancelError" />
-      <p v-if="!state.recordsLoaded && !state.recordsPending" class="m1-muted">
-        点击“刷新记录”查看你的预约。
-      </p>
-      <p
-        v-else-if="state.recordsLoaded && !state.records.length"
-        class="m1-muted"
-      >
-        暂无预约记录，选择一个座位开始吧。
-      </p>
-      <ul v-if="state.records.length" class="m1-record-list">
-        <li v-for="booking in state.records" :key="booking.id">
-          <div>
-            <strong>座位 {{ booking.seat_id }}</strong
-            ><span
-              >{{ formatCampusTime(booking.start_time) }} —
-              {{ formatCampusTime(booking.end_time) }}</span
-            >
-          </div>
-          <span class="m1-badge">{{
-            statusLabels[booking.status] || "状态待确认"
-          }}</span
-          ><button
-            v-if="booking.status === 'BOOKED'"
-            class="m1-text-button"
-            :disabled="!!state.cancelPending"
-            @click="cancelRecord(booking.id)"
-          >
-            {{
-              state.cancelPending === String(booking.id)
-                ? "取消中…"
-                : "取消预约"
-            }}
-          </button>
-        </li>
-      </ul>
-    </section>
+    <PersonalBookings :model="personal" />
     <dialog
       ref="dialog"
       class="m1-dialog"

@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 let mode = "success",
   bookings = [],
-  serial = 500;
+  serial = 500,
+  mutations = 0;
 const seats = [
   {
     seat_id: "301",
@@ -72,8 +73,40 @@ const server = await createServer({
               mode = url.searchParams.get("mode") || "success";
               bookings = [];
               serial = 500;
+              mutations = 0;
+              if (
+                [
+                  "history",
+                  "forbidden",
+                  "missing",
+                  "expired-code",
+                  "personal-refresh-error",
+                ].includes(mode)
+              ) {
+                const states = [
+                  "BOOKED",
+                  "CHECKED_IN",
+                  "CANCELLED",
+                  "NO_SHOW",
+                  "COMPLETED",
+                ];
+                bookings = Array.from({ length: 26 }, (_, i) => ({
+                  id: String(501 + i),
+                  seat_id: String(301 + (i % 3)),
+                  reservation_id: String(901 + i),
+                  status: states[i % 5],
+                  start_time: "2026-11-01T09:00:00+08:00",
+                  end_time: "2026-11-01T11:00:00+08:00",
+                  created_at: "2026-10-28T08:00:00+08:00",
+                  cancelled_at:
+                    states[i % 5] === "CANCELLED"
+                      ? "2026-10-28T09:00:00+08:00"
+                      : null,
+                }));
+                serial = 600;
+              }
             }
-            return reply(200, { mode, bookings });
+            return reply(200, { mode, bookings, mutations });
           }
           try {
             if (mode === "slow")
@@ -81,6 +114,9 @@ const server = await createServer({
             const path = url.pathname;
             if (
               mode === "error" ||
+              (mode === "personal-refresh-error" &&
+                mutations > 0 &&
+                req.method === "GET") ||
               (mode === "refresh-error" &&
                 bookings.length &&
                 req.method === "GET")
@@ -116,13 +152,120 @@ const server = await createServer({
                 ),
               );
             }
+            const paginate = (items) => {
+              const page = Math.max(
+                1,
+                Number(url.searchParams.get("page")) || 1,
+              );
+              const size = Math.max(
+                1,
+                Number(url.searchParams.get("page_size")) || 20,
+              );
+              return {
+                items: items.slice((page - 1) * size, page * size),
+                page,
+                page_size: size,
+                total: items.length,
+              };
+            };
             if (path === "/api/m1/bookings/me")
-              return reply(200, {
-                items: bookings,
-                page: 1,
-                page_size: 20,
-                total: bookings.length,
-              });
+              return reply(
+                200,
+                paginate(
+                  bookings.filter(
+                    (b) =>
+                      !url.searchParams.get("status") ||
+                      b.status === url.searchParams.get("status"),
+                  ),
+                ),
+              );
+            if (path === "/api/m1/violations/me")
+              return reply(
+                200,
+                paginate(
+                  [
+                    "history",
+                    "forbidden",
+                    "missing",
+                    "expired-code",
+                    "personal-refresh-error",
+                  ].includes(mode)
+                    ? Array.from({ length: 23 }, (_, i) => ({
+                        id: String(801 + i),
+                        booking_id: "504",
+                        violation_type: "NO_SHOW",
+                        occurred_at: "2026-11-01T09:15:00+08:00",
+                      }))
+                    : [],
+                ),
+              );
+            const detail = /^\/api\/m1\/bookings\/(\d+)$/.exec(path);
+            if (detail && req.method === "GET") {
+              const booking = bookings.find((b) => b.id === detail[1]);
+              return booking && mode !== "missing"
+                ? reply(200, booking)
+                : reply(404, null, "预约记录不存在");
+            }
+            const action =
+              /^\/api\/m1\/bookings\/(\d+)\/(checkin|cancel)$/.exec(path);
+            if (action && req.method === "POST") {
+              const booking = bookings.find((b) => b.id === action[1]);
+              if (mode === "forbidden")
+                return reply(403, null, "无权操作该预约");
+              if (!booking) return reply(404, null, "预约记录不存在");
+              if (booking.status !== "BOOKED")
+                return reply(409, null, "预约状态已变化");
+              if (action[2] === "checkin") {
+                let text = "";
+                for await (const chunk of req) text += chunk;
+                const body = JSON.parse(text);
+                if (mode === "expired-code" || body.code !== "482916")
+                  return reply(422, null, "签到码错误或已过期");
+                booking.status = "CHECKED_IN";
+                mutations++;
+                return reply(200, {
+                  id: String(1000 + mutations),
+                  booking_id: booking.id,
+                  checkin_method: "CODE",
+                  checkin_time: new Date().toISOString(),
+                });
+              }
+              booking.status = "CANCELLED";
+              booking.cancelled_at = new Date().toISOString();
+              mutations++;
+              return reply(200, booking);
+            }
+            if (path === "/api/m1/bookings/rebook" && req.method === "POST") {
+              let text = "";
+              for await (const chunk of req) text += chunk;
+              const body = JSON.parse(text),
+                original = bookings.find(
+                  (b) => b.id === body.original_booking_id,
+                );
+              if (!original) return reply(404, null, "原预约不存在");
+              if (
+                bookings.some(
+                  (b) =>
+                    b.seat_id === original.seat_id &&
+                    ["BOOKED", "CHECKED_IN"].includes(b.status) &&
+                    b.start_time < body.end_time &&
+                    body.start_time < b.end_time,
+                )
+              )
+                return reply(409, null, "所选时段已被占用，请另选时段");
+              const booking = {
+                id: String(++serial),
+                seat_id: original.seat_id,
+                start_time: body.start_time,
+                end_time: body.end_time,
+                status: "BOOKED",
+                created_at: new Date().toISOString(),
+                cancelled_at: null,
+              };
+              bookings.unshift(booking);
+              mutations++;
+              return reply(201, booking);
+            }
             if (path === "/api/m1/bookings" && req.method === "POST") {
               let text = "";
               for await (const chunk of req) text += chunk;
@@ -137,14 +280,6 @@ const server = await createServer({
               };
               bookings.unshift(booking);
               return reply(201, booking);
-            }
-            const cancel = /^\/api\/m1\/bookings\/(\d+)\/cancel$/.exec(path);
-            if (cancel && req.method === "POST") {
-              const booking = bookings.find((b) => b.id === cancel[1]);
-              if (booking) {
-                booking.status = "CANCELLED";
-                return reply(200, booking);
-              }
             }
             return reply(404, null, "测试场景未定义该接口");
           } catch {

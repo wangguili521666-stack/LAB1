@@ -7,6 +7,41 @@ globalThis.localStorage = {
 };
 globalThis.window = { addEventListener() {} };
 const { m1Api } = await import("../src/api/m1.js");
+test("personal adapters preserve pagination, IDs, CODE payload and new rebook interval", async () => {
+  const calls = [];
+  globalThis.fetch = async (path, options) => {
+    calls.push({ path, options });
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ code: "OK", data: {} }),
+    };
+  };
+  await m1Api.bookings({ page: 2, page_size: 20, status: "COMPLETED" });
+  await m1Api.booking("9007199254740993");
+  await m1Api.checkin("9007199254740993", "AB12");
+  await m1Api.rebook({
+    original_booking_id: "9007199254740993",
+    start_time: "new-start",
+    end_time: "new-end",
+  });
+  await m1Api.violations({ page: 2, page_size: 20 });
+  assert.equal(
+    calls[0].path,
+    "/api/m1/bookings/me?page=2&page_size=20&status=COMPLETED",
+  );
+  assert.equal(calls[1].path, "/api/m1/bookings/9007199254740993");
+  assert.deepEqual(JSON.parse(calls[2].options.body), {
+    checkin_method: "CODE",
+    code: "AB12",
+  });
+  assert.equal(calls[3].path, "/api/m1/bookings/rebook");
+  assert.equal(
+    JSON.parse(calls[3].options.body).original_booking_id,
+    "9007199254740993",
+  );
+  assert.equal(calls[4].path, "/api/m1/violations/me?page=2&page_size=20");
+});
 test("M1 adapter uses protected request envelope, query encoding and exact body", async () => {
   const calls = [];
   globalThis.fetch = async (path, options) => {

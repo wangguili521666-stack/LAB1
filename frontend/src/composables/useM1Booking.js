@@ -1,6 +1,6 @@
 import { computed, reactive, watch, onScopeDispose } from "vue";
 import { buildSearch, defaultFilters, filterKey } from "../utils/m1.js";
-export function useM1Booking(api) {
+export function useM1Booking(api, options = {}) {
   const filters = reactive(defaultFilters());
   const state = reactive({
     seats: [],
@@ -135,7 +135,10 @@ export function useM1Booking(api) {
       if (disposed) return true;
       state.success = "预约成功。请按时到达并签到。";
       state.selected = null;
-      await Promise.all([search(), loadRecords()]);
+      await Promise.all([
+        search(),
+        options.refreshRecords ? options.refreshRecords() : loadRecords(),
+      ]);
       return true;
     } catch (error) {
       if (disposed) return false;
