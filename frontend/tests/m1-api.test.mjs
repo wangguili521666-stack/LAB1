@@ -7,6 +7,32 @@ globalThis.localStorage = {
 };
 globalThis.window = { addEventListener() {} };
 const { m1Api } = await import("../src/api/m1.js");
+test("admin adapters use verified user profile, encoded key and string setting body", async () => {
+  const calls = [];
+  globalThis.fetch = async (path, options) => {
+    calls.push({ path, options });
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ code: "OK", data: {} }),
+    };
+  };
+  await m1Api.profile();
+  await m1Api.adminBookings({ page: 2, page_size: 20 });
+  await m1Api.statistics({ start_time: "a", end_time: "b" });
+  await m1Api.settings();
+  await m1Api.updateSetting("server/key", "6");
+  assert.equal(calls[0].path, "/api/d1/users/me");
+  assert.equal(calls[1].path, "/api/m1/admin/bookings?page=2&page_size=20");
+  assert.equal(
+    calls[2].path,
+    "/api/m1/admin/statistics?start_time=a&end_time=b",
+  );
+  assert.equal(calls[3].path, "/api/m1/settings");
+  assert.equal(calls[4].path, "/api/m1/settings/server%2Fkey");
+  assert.equal(calls[4].options.method, "PUT");
+  assert.deepEqual(JSON.parse(calls[4].options.body), { setting_value: "6" });
+});
 test("personal adapters preserve pagination, IDs, CODE payload and new rebook interval", async () => {
   const calls = [];
   globalThis.fetch = async (path, options) => {

@@ -1,4 +1,4 @@
-# M1 第二、三阶段测试与预览
+# M1 第二至第四阶段测试与预览
 
 包含座位查询与预约、个人记录分页与详情、取消、编码签到、复约及违约记录前端；真实 M1/D2 服务尚未在本仓库提供。模拟预览不产生真实预约，不证明后端鉴权、资源释放或并发控制。
 
@@ -7,7 +7,7 @@
 在已按 `frontend/package-lock.json` 正确安装依赖的前端目录运行：
 
 ```powershell
-node --test tests/auth.test.mjs tests/m1.test.mjs tests/m1-api.test.mjs tests/m1-personal.test.mjs
+node --test tests/auth.test.mjs tests/m1.test.mjs tests/m1-api.test.mjs tests/m1-personal.test.mjs tests/m1-admin.test.mjs
 npm.cmd run build
 ```
 
@@ -50,3 +50,17 @@ node scripts/m1-preview.mjs
 再次预约使用新的时间输入和 original_booking_id，不覆盖历史记录；测试已有占用时段可验证 409 冲突，换用其他整点时段可成功。模拟后端仅用于前端协议和交互测试，不具备真实后端的全部规则。
 
 在同一 Playwright 工具环境中运行 `node tests/m1-personal-browser.cjs`。不要与 `m1-browser.cjs` 并行运行，两者共享本机模拟状态；应先运行旧流程回归，再运行个人业务验收。第三阶段对应 `docs/requirements/m1-frontend-phase3-validation.md`。
+
+## 第四阶段管理端验收
+
+顶部选择“系统管理员 · 管理与配置”，重置后在页面底部展开管理工作台。模拟身份由本地 `/api/d1/users/me` 返回，正式代码不读取预览场景参数来授予权限。选择运营管理员、自习室管理员分别验证只读入口；学生场景不显示管理工作台，也不主动请求管理数据。
+
+管理员可按预约开始日期、教室编号和状态查询并翻页；日期区间含开始、不含结束，均为北京时间。统计展示返回的四类计数，缺失字段用“系统未提供”标识，不能当作零。默认查询当天，管理范围不使用学生预约的 4 小时时长限制。
+
+配置仅列出服务端返回的键。预览中的 `max_booking_hours` 和 `checkin_reminder_minutes` 是测试数据，尚非小组正式确认的配置契约。保存时只发送一个原有键和字符串值，前端不猜测数据类型、取值范围或新增键。预览服务为测试最大时长参数实现了示例范围校验；正式环境由后端决定。
+
+依用户确认，保存配置暂不自动改变学生端的默认 4 小时校验；页面显式提示该限制。真实字段和同步方式确认后再接入，不能把模拟保存当成真实配置生效。
+
+可切换权限拒绝、缺失统计字段、空数据、配置加载失败、配置保存后刷新失败、配置不合法场景。顺序运行 `node tests/m1-browser.cjs`、`node tests/m1-personal-browser.cjs`、`node tests/m1-admin-browser.cjs`，不要并行共享模拟状态。
+
+第四阶段验收说明见 `docs/requirements/m1-frontend-phase4-validation.md`。前端角色控制只决定界面和请求入口，真实权限及按教室/学院的数据范围必须由后端逐次校验。

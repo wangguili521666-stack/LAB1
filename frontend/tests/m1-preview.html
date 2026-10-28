@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>M1 第三阶段 · 模拟接口验收</title>
+    <title>M1 第四阶段 · 模拟接口验收</title>
   </head>
   <body>
     <aside class="preview-banner">
@@ -12,7 +12,18 @@
       ><label
         >测试场景
         <select id="scenario">
-          <option value="success">正常预约</option>
+          <option value="success">学生 · 正常预约</option>
+          <option value="admin">系统管理员 · 管理与配置</option>
+          <option value="operator">运营管理员 · 只读</option>
+          <option value="classroom-admin">自习室管理员 · 只读</option>
+          <option value="admin-denied">管理接口拒绝访问</option>
+          <option value="admin-missing-stats">统计字段缺失</option>
+          <option value="admin-empty">管理数据为空</option>
+          <option value="admin-settings-error">配置加载失败</option>
+          <option value="admin-save-refresh-error">
+            配置保存成功但刷新失败
+          </option>
+          <option value="admin-setting-rejected">配置值不合法</option>
           <option value="history">历史/签到/复约（测试码 482916）</option>
           <option value="forbidden">取消无权限</option>
           <option value="missing">详情不存在</option>

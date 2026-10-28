@@ -6,6 +6,7 @@ import { m1Api } from "../api/m1.js";
 import { useM1Booking } from "../composables/useM1Booking.js";
 import { formatCampusTime, socketLabels } from "../utils/m1.js";
 import PersonalBookings from "../components/m1/PersonalBookings.vue";
+import AdminPanel from "../components/m1/AdminPanel.vue";
 import { useM1Personal } from "../composables/useM1Personal.js";
 let refreshSeats = async () => true;
 const personal = useM1Personal(m1Api, () => refreshSeats());
@@ -232,6 +233,7 @@ function closeDialog(event) {
       </div>
     </section>
     <PersonalBookings :model="personal" />
+    <AdminPanel />
     <dialog
       ref="dialog"
       class="m1-dialog"

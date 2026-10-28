@@ -6,6 +6,7 @@ let mode = "success",
   bookings = [],
   serial = 500,
   mutations = 0;
+let settings = [];
 const seats = [
   {
     seat_id: "301",
@@ -49,7 +50,8 @@ const server = await createServer({
           const url = new URL(req.url, "http://127.0.0.1");
           if (
             !url.pathname.startsWith("/api/m1/") &&
-            url.pathname !== "/__m1_preview"
+            url.pathname !== "/__m1_preview" &&
+            url.pathname !== "/api/d1/users/me"
           )
             return next();
           const reply = (status, data, message = "success") => {
@@ -74,6 +76,18 @@ const server = await createServer({
               bookings = [];
               serial = 500;
               mutations = 0;
+              settings = [
+                {
+                  setting_key: "max_booking_hours",
+                  setting_value: "4",
+                  updated_at: new Date().toISOString(),
+                },
+                {
+                  setting_key: "checkin_reminder_minutes",
+                  setting_value: "10",
+                  updated_at: new Date().toISOString(),
+                },
+              ];
               if (
                 [
                   "history",
@@ -81,7 +95,10 @@ const server = await createServer({
                   "missing",
                   "expired-code",
                   "personal-refresh-error",
-                ].includes(mode)
+                ].includes(mode) ||
+                mode.startsWith("admin") ||
+                mode === "operator" ||
+                mode === "classroom-admin"
               ) {
                 const states = [
                   "BOOKED",
@@ -104,10 +121,50 @@ const server = await createServer({
                       : null,
                 }));
                 serial = 600;
+                if (
+                  mode.startsWith("admin") ||
+                  ["operator", "classroom-admin"].includes(mode)
+                ) {
+                  const day = new Date(Date.now() + 8 * 3600000)
+                    .toISOString()
+                    .slice(0, 10);
+                  bookings = bookings.map((b, i) => ({
+                    ...b,
+                    user_id: String(101 + (i % 4)),
+                    start_time: day + "T09:00:00+08:00",
+                    end_time: day + "T11:00:00+08:00",
+                  }));
+                  if (mode === "admin-empty") {
+                    bookings = [];
+                    settings = [];
+                  }
+                }
               }
             }
-            return reply(200, { mode, bookings, mutations });
+            return reply(200, { mode, bookings, mutations, settings });
           }
+          const role = mode.startsWith("admin")
+            ? "SYSTEM_ADMIN"
+            : mode === "operator"
+              ? "OPERATION_ADMIN"
+              : mode === "classroom-admin"
+                ? "CLASSROOM_ADMIN"
+                : "STUDENT";
+          if (url.pathname === "/api/d1/users/me")
+            return reply(200, { id: "101", roles: [role] });
+          if (
+            url.pathname.startsWith("/api/m1/admin/") &&
+            (!["SYSTEM_ADMIN", "OPERATION_ADMIN", "CLASSROOM_ADMIN"].includes(
+              role,
+            ) ||
+              mode === "admin-denied")
+          )
+            return reply(403, null, "无权访问当前管理范围");
+          if (
+            url.pathname.startsWith("/api/m1/settings") &&
+            role !== "SYSTEM_ADMIN"
+          )
+            return reply(403, null, "只有系统管理员可编辑配置");
           try {
             if (mode === "slow")
               await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -168,6 +225,80 @@ const server = await createServer({
                 total: items.length,
               };
             };
+            if (path.startsWith("/api/m1/admin/")) {
+              const matching = bookings.filter(
+                (b) =>
+                  (!url.searchParams.get("start_time") ||
+                    b.start_time >= url.searchParams.get("start_time")) &&
+                  (!url.searchParams.get("end_time") ||
+                    b.start_time < url.searchParams.get("end_time")) &&
+                  (!url.searchParams.get("classroom_id") ||
+                    seats.find((seat) => seat.seat_id === b.seat_id)
+                      ?.classroom_id === url.searchParams.get("classroom_id")),
+              );
+              if (path === "/api/m1/admin/bookings")
+                return reply(
+                  200,
+                  paginate(
+                    matching.filter(
+                      (b) =>
+                        !url.searchParams.get("status") ||
+                        b.status === url.searchParams.get("status"),
+                    ),
+                  ),
+                );
+              if (path === "/api/m1/admin/statistics") {
+                const values = {
+                  total_bookings: matching.length,
+                  completed_bookings: matching.filter(
+                    (b) => b.status === "COMPLETED",
+                  ).length,
+                  no_show_bookings: matching.filter(
+                    (b) => b.status === "NO_SHOW",
+                  ).length,
+                  cancelled_bookings: matching.filter(
+                    (b) => b.status === "CANCELLED",
+                  ).length,
+                };
+                if (mode === "admin-missing-stats")
+                  delete values.no_show_bookings;
+                return reply(200, values);
+              }
+            }
+            if (path === "/api/m1/settings" && req.method === "GET") {
+              if (
+                mode === "admin-settings-error" ||
+                (mode === "admin-save-refresh-error" && mutations > 0)
+              )
+                return reply(503, null, "配置读取失败");
+              return reply(200, settings);
+            }
+            if (path.startsWith("/api/m1/settings/") && req.method === "PUT") {
+              const key = decodeURIComponent(
+                  path.slice("/api/m1/settings/".length),
+                ),
+                item = settings.find((x) => x.setting_key === key);
+              if (!item) return reply(404, null, "配置项不存在");
+              let text = "";
+              for await (const chunk of req) text += chunk;
+              const body = JSON.parse(text);
+              if (
+                mode === "admin-setting-rejected" ||
+                (key === "max_booking_hours" &&
+                  (!/^\d+$/.test(body.setting_value) ||
+                    Number(body.setting_value) < 1 ||
+                    Number(body.setting_value) > 24))
+              )
+                return reply(
+                  422,
+                  null,
+                  "测试服务：最大预约时长须为 1 到 24 的整数",
+                );
+              item.setting_value = body.setting_value;
+              item.updated_at = new Date().toISOString();
+              mutations++;
+              return reply(200, item);
+            }
             if (path === "/api/m1/bookings/me")
               return reply(
                 200,
