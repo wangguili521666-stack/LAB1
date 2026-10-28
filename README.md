@@ -128,7 +128,7 @@ npm run dev
 ```
 
 启动脚本会尝试打开 Docker Desktop，首次运行生成缺失的本地配置和随机密钥，
-然后构建并启动 **MySQL → D1 用户后端 → 前端**。
+然后构建并启动 **MySQL → D1 用户后端、M2 教室申请后端 → 前端**。
 数据库健康后，D1 自动执行现有版本化迁移；已执行的迁移会跳过。
 脚本保留已有 `.env`、数据库账号密码和数据卷，不清库或重置密码。
 本机无需安装 Node.js、npm；首次生成配置需要 openssl（macOS 已提供）。
@@ -140,9 +140,10 @@ npm run dev
 docker compose up -d --build --wait
 ```
 
-**当前仓库仅 D1 有后端实现。** 一键启动覆盖现有可运行服务，
-支持注册、登录、个人资料；M1/M2/M3/D2/D3 尚无后端，相关业务暂不可用。
-没有为这些模块创建占位服务或修改业务页面。
+**当前可运行的后端是 D1 和 M2。** 一键启动覆盖现有可运行服务，
+支持注册、登录、个人资料，以及教室查询、申请和两级审批。
+M2 的权限判断和教室占用依赖 D1 的内部鉴权、D2 的资源预占；这两处尚未实现时，申请接口会返回依赖服务不可用。
+M1、M3、D3 尚无后端。
 
 ### 登录与首次注册
 
@@ -166,7 +167,7 @@ docker compose up -d --build --wait
 
 ```bash
 docker compose ps
-docker compose logs --tail=80 d1 mysql frontend
+docker compose logs --tail=80 d1 m2 mysql frontend
 ```
 
 三个服务应处于 `healthy` 状态；仅打开前端预览或单独运行前端，不能代替启动 D1 和 MySQL。
@@ -193,7 +194,8 @@ docker compose run --rm --no-deps frontend node --test tests/auth.test.mjs
 
 - 前端默认仅监听本机 5173；端口冲突时在 `.env` 设置 `FRONTEND_PORT=5174`。
 - `/api/d1` 通过 Compose 网络连接 `d1:3004`，D1 只使用 `d1_app` 账号连接 `campus_d1`。
-- D1 不发布宿主机端口，浏览器统一通过前端访问接口。
+- `/api/m2` 连接 `m2:3002`，M2 只使用 `m2_app` 账号连接 `campus_m2`，并用 `D1_JWT_SECRET` 校验登录态。
+- D1 和 M2 都不发布宿主机端口，浏览器统一通过前端访问接口。
 - 其他 `/api` 不再默认转发到宿主机 8080，以免误连其他项目。
   后续网关就绪后，在 `.env` 配置 `API_TARGET=http://实际网关地址:端口`。
 - MySQL 端口仍由 `.env` 的 `MYSQL_PORT` 控制；数据保存在原 `mysql_data` 卷中。
