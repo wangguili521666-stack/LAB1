@@ -14,6 +14,10 @@ export default defineConfig({
         target: process.env.D1_API_TARGET || 'http://localhost:3004',
         changeOrigin: true
       },
+      '/api/m2': {
+        target: process.env.M2_API_TARGET || 'http://localhost:3002',
+        changeOrigin: true
+      },
       '/api': {
         target: process.env.API_TARGET || 'http://localhost:8080',
         changeOrigin: true

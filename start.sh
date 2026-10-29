@@ -30,12 +30,12 @@ if ! grep -Eq '^D1_JWT_SECRET=.+$' .env; then
 fi
 
 docker compose config --quiet
-echo '正在构建并启动 MySQL、D1 和前端，首次运行需要下载依赖…'
-if ! docker compose up -d --build --wait --wait-timeout 180 mysql d1 frontend; then
-  echo '启动未完成。请运行 docker compose ps 和 docker compose logs --tail=80 mysql d1 frontend 查看原因。'
+echo '正在构建并启动 MySQL、D1、M2 和前端，首次运行需要下载依赖…'
+if ! docker compose up -d --build --wait --wait-timeout 180 mysql d1 m2 frontend; then
+  echo '启动未完成。请运行 docker compose ps 和 docker compose logs --tail=80 mysql d1 m2 frontend 查看原因。'
   exit 1
 fi
 frontend_address=$(docker compose port frontend 5173)
 printf '\n启动成功，访问：http://%s/login\n' "$frontend_address"
 echo '停止本项目：docker compose stop'
-echo '当前包含前端、D1 用户服务、MySQL；其他后端尚未实现。'
+echo '当前包含前端、D1 用户服务、M2 教室申请服务和 MySQL；M1、M3、D2、D3 尚未实现。'
