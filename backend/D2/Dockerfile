@@ -1,0 +1,10 @@
+FROM node:22-alpine
+WORKDIR /app
+RUN chown node:node /app
+USER node
+COPY --chown=node:node package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+COPY --chown=node:node . .
+ENV HOST=0.0.0.0
+EXPOSE 3005
+CMD ["sh", "-c", "npm run migrate && exec node src/index.js"]
