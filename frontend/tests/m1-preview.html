@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>M1 第四阶段 · 模拟接口验收</title>
+  </head>
+  <body>
+    <aside class="preview-banner">
+      <strong>前端验收预览 · 模拟接口</strong
+      ><span>此处操作不会创建真实预约。正式页面连接真实服务。</span
+      ><label
+        >测试场景
+        <select id="scenario">
+          <option value="success">学生 · 正常预约</option>
+          <option value="admin">系统管理员 · 管理与配置</option>
+          <option value="operator">运营管理员 · 只读</option>
+          <option value="classroom-admin">自习室管理员 · 只读</option>
+          <option value="admin-denied">管理接口拒绝访问</option>
+          <option value="admin-missing-stats">统计字段缺失</option>
+          <option value="admin-empty">管理数据为空</option>
+          <option value="admin-settings-error">配置加载失败</option>
+          <option value="admin-save-refresh-error">
+            配置保存成功但刷新失败
+          </option>
+          <option value="admin-setting-rejected">配置值不合法</option>
+          <option value="history">历史/签到/复约（测试码 482916）</option>
+          <option value="forbidden">取消无权限</option>
+          <option value="missing">详情不存在</option>
+          <option value="expired-code">签到码过期</option>
+          <option value="personal-refresh-error">操作成功但记录刷新失败</option>
+          <option value="empty">没有空闲座位</option>
+          <option value="conflict">预约冲突</option>
+          <option value="error">服务异常</option>
+          <option value="refresh-error">预约成功但刷新失败</option>
+          <option value="slow">慢速响应</option>
+        </select></label
+      ><button id="reset">切换场景并重置</button>
+    </aside>
+    <main id="app"></main>
+    <script type="module">
+      import { createApp } from "vue";
+      import M1 from "/src/views/M1.vue";
+      import "/src/styles.css";
+      import { setToken } from "/src/utils/request.js";
+      // Fixture token belongs to this local preview origin only; no real account is used.
+      setToken("m1-local-preview-only");
+      createApp(M1).mount("#app");
+      const info = await fetch("/__m1_preview").then((r) => r.json());
+      document.querySelector("#scenario").value = info.data.mode;
+      document.querySelector("#reset").onclick = async () => {
+        await fetch(
+          "/__m1_preview?mode=" + document.querySelector("#scenario").value,
+          { method: "POST" },
+        );
+        location.reload();
+      };
+    </script>
+    <style>
+      .preview-banner {
+        padding: 16px 24px;
+        background: #eaf0e6;
+        border-bottom: 1px solid #cfdbca;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: #324d36;
+      }
+      .preview-banner span {
+        flex: 1;
+      }
+      .preview-banner select,
+      .preview-banner button {
+        font: inherit;
+        padding: 8px;
+        border: 1px solid #b8cbb8;
+        border-radius: 5px;
+        background: #fff;
+        color: #324d36;
+      }
+      #app {
+        padding: 40px 32px;
+      }
+      @media (max-width: 560px) {
+        #app {
+          padding: 24px 16px;
+        }
+        .preview-banner {
+          padding: 14px 16px;
+        }
+        .preview-banner span {
+          flex-basis: 100%;
+        }
+      }
+    </style>
+  </body>
+</html>
