@@ -5,6 +5,8 @@ services:
     depends_on:
       d1:
         condition: service_healthy
+      m2:
+        condition: service_healthy
     build:
       context: ./frontend
     init: true
@@ -13,6 +15,7 @@ services:
       - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
     environment:
       D1_API_TARGET: http://d1:3004
+      M2_API_TARGET: http://m2:3002
       # Other backends/gateway are not implemented; opt in to a real gateway via .env.
       API_TARGET: ${API_TARGET:-http://127.0.0.1:8080}
       VITE_USE_POLLING: "true"
@@ -49,6 +52,35 @@ services:
       JWT_EXPIRES_IN: "86400"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3004/api/d1/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  m2:
+    build:
+      context: ./backend/M2
+    init: true
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: "3002"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_m2
+      DB_USER: m2_app
+      DB_PASSWORD: ${M2_DB_PASSWORD:?请配置 M2_DB_PASSWORD}
+      DB_TIMEZONE: "+08:00"
+      JWT_SECRET: ${D1_JWT_SECRET:?请先运行 ./start.sh 生成登录签名密钥}
+      D1_BASE_URL: http://d1:3004
+      D2_BASE_URL: http://d2:3005
+      D3_BASE_URL: http://d3:3006
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-}
+      M2_APPROVAL_TIMEOUT_HOURS: ${M2_APPROVAL_TIMEOUT_HOURS:-24}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/api/m2/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 6

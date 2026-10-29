@@ -47,7 +47,7 @@ D2：
 id	BIGINT PK	教室 ID
 building	VARCHAR(100)	教学楼
 room_number	VARCHAR(30)	房间号
-college_id	BIGINT FK	所属学院，可空
+college_id	BIGINT	所属学院，可空；2026-10-28 确认为 D1 逻辑引用，经公开 API 校验，不建立跨库外键
 capacity	INT	容量
 equipment	JSON	设备信息
 status	VARCHAR(20)	AVAILABLE / MAINTENANCE / DISABLED
@@ -76,14 +76,34 @@ resource_id	BIGINT	座位或教室 ID
 classroom_id	BIGINT FK	对应教室 ID
 source_module	VARCHAR(10)	M1 / M2
 source_id	BIGINT	来源业务记录 ID
-start_time	DATETIME	占用开始时间
-end_time	DATETIME	占用结束时间
+start_time	DATETIME(3)	占用开始时间，UTC
+end_time	DATETIME(3)	占用结束时间，UTC
 status	VARCHAR(20)	HELD / CONFIRMED / RELEASED
-hold_expires_at	DATETIME	预占有效期
+hold_expires_at	DATETIME(3)	预占有效期，UTC；API 创建 HELD 时必有有效截止，确认/释放后保留原值用于幂等追踪
 created_at	DATETIME	创建时间
 
-D3：通知、个人消息、公告与操作日志模块
-2026-10-23 本地首版扩展：物理结构以 backend/D3/migrations/001_d3_core.sql 为准。D3 仅使用自己的逻辑库/账号；时间使用 DATETIME(3) 存储 UTC；API 输出带 Z 的 ISO 8601。用户 ID 为 D1 逻辑引用，不建立跨库外键。已有数据库的真实表结构尚未核对；初始迁移发现同名业务表会拒绝运行，不覆盖已有数据。
+resource_reservations 约束：唯一 (source_module, source_id)；M1 仅 SEAT，M2 仅 CLASSROOM；时间区间左闭右开，start_time < end_time。classroom_id 指向 D2 自有 classrooms，resource_id 的多态关联由事务内资源校验保证。并发冲突由同一教室行锁保护，普通唯一索引不替代区间互斥。
+
+4. maintenance_blocks 维修来源表（2026-10-28 用户批准）
+字段	类型	说明
+ticket_id	BIGINT PK	M3 工单逻辑引用，不跨库外键
+classroom_id	BIGINT FK	首次同步后固定关联 D2 教室
+active	BOOLEAN	该工单是否仍阻塞新预约
+revision	INT	M3 单工单单调递增正整数版本，重复/乱序处理见 docs/api/d2.md
+updated_at	DATETIME(3)	最后一次接受新版本的 UTC 时间
+
+5. operation_log_outbox 审计投递表（第一阶段已获用户批准）
+字段	类型	说明
+id	BIGINT PK	投递记录 ID
+payload	JSON	D3 OperationLogCreate 载荷，不含秘密或请求正文
+status	VARCHAR(20)	PENDING / SENT
+attempts	INT	发送尝试次数
+next_attempt_at	DATETIME	下次可重试 UTC 时间
+last_error_code	VARCHAR(50) NULL	不含秘密的错误标识
+created_at	DATETIME	创建 UTC 时间
+sent_at	DATETIME NULL	成功投递 UTC 时间
+
+D3：公告与操作日志模块
 1. announcements 公告表
 字段	类型	说明
 id	BIGINT PK	公告 ID
