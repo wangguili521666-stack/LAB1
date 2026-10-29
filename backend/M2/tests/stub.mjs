@@ -23,7 +23,8 @@ export async function startStub(token) {
   const app = express()
   app.use(express.json())
   app.use((req, res, next) => {
-    if (req.get('x-service-token') !== token) {
+    const supplied = req.path.startsWith('/api/d3/') ? req.get('x-d3-service-token') : req.path.startsWith('/api/d2/') ? req.get('authorization')?.replace(/^Bearer /, '') : req.get('x-service-token')
+    if (supplied !== token) {
       return res.status(401).json(envelope('UNAUTHORIZED', '服务身份无效'))
     }
     next()

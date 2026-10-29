@@ -6,7 +6,7 @@ export const mockServiceTokens = Object.fromEntries(['M1', 'M2', 'M3', 'D1', 'D2
 export const mockUsers = {
   'mock-student-101': { id: '101', roles: ['STUDENT'] },
   'mock-student-102': { id: '102', roles: ['STUDENT'] },
-  'mock-operator-103': { id: '103', roles: ['OPERATION_ADMIN'] },
+  'mock-operator-103': { id: '103', roles: ['OPERATION_ADMIN'], permissions: ['announcement:manage'] },
   'mock-admin-104': { id: '104', roles: ['SYSTEM_ADMIN'] }
 }
 export async function mockAuthenticate(header) {

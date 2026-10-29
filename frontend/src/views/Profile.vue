@@ -1,4 +1,5 @@
 <script setup>
+import PersonalRecords from '../components/PersonalRecords.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { request, clearToken } from '../utils/request.js'
@@ -204,5 +205,6 @@ onMounted(load)
         </div>
       </section>
     </div>
+    <PersonalRecords v-if="profile" />
   </div>
 </template>

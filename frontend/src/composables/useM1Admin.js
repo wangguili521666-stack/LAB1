@@ -43,12 +43,12 @@ export function useM1Admin(api, session) {
     () =>
       access.loaded &&
       !access.denied &&
-      access.roles.some((role) =>
+      (access.permissions?.some(p=>["booking:read","booking:read_all"].includes(p)) || access.roles.some((role) =>
         ["SYSTEM_ADMIN", "CLASSROOM_ADMIN", "OPERATION_ADMIN"].includes(role),
-      ),
+      )),
   );
   const canWrite = computed(
-    () => canRead.value && access.roles.includes("SYSTEM_ADMIN"),
+    () => canRead.value && (access.roles.includes("SYSTEM_ADMIN")||access.permissions?.includes("booking:configure")),
   );
   let epoch = 0,
     accessVersion = 0,
@@ -118,6 +118,7 @@ export function useM1Admin(api, session) {
     epoch++;
     resetData();
     access.roles = [];
+    access.permissions = [];
     access.denied = true;
     access.error = message || "无权访问管理数据，请重新确认权限。";
   }
@@ -142,6 +143,7 @@ export function useM1Admin(api, session) {
       )
         throw new Error("权限信息格式异常");
       access.roles = [...user.roles];
+      access.permissions = user.permissions || [];
       access.loaded = true;
       return true;
     } catch (error) {

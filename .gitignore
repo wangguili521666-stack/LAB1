@@ -10,3 +10,5 @@ dist/
 
 # 日志
 *.log
+
+.local-logs/

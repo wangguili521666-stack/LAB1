@@ -259,3 +259,13 @@ reviewer_id	BIGINT FK	评价用户
 rating	TINYINT	评分 1–5
 comment	TEXT	评价内容
 created_at	DATETIME	评价时间
+
+## 2026-10-29 M1/M3 实施迁移
+
+M1 新增 classroom_id 快照、hold_expires_at，持久化 CREATING/CANCELLING/EXPIRING 恢复状态。notification_outbox 唯一 (booking_id,kind)，保存稳定通知载荷；event_outbox 保存稳定审计事件，业务事务内写入。跨模块用户/资源 ID 为逻辑引用，不建立跨库外键。时间统一 UTC DATETIME(3)。
+
+M3 新增 revision、sync_pending、maintenance_active，追踪维修同步；event_outbox 保存审计事件。repair_progress.operator_id 可空，用于系统超时升级。优先级最多 3，首次超时升级一次。两模块迁移位于各自 migrations/001_*.sql。
+
+## 动态角色权限补充
+
+D1 迁移 003_rbac.sql：向现有 permissions/role_permissions 幂等加入实际支持的业务动作和默认映射；rbac_lock 单行用于序列化角色授权修改和保护最后管理员；rbac_audit_outbox(id,payload,sent) 保存角色创建、权限替换、用户角色替换的稳定审计事件。历史迁移未改写。

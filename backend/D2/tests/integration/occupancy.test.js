@@ -18,8 +18,8 @@ const db = { host: process.env.D2_TEST_DB_HOST, port: Number(process.env.D2_TEST
 const keys = Object.fromEntries(['M1', 'M2', 'M3'].map(module => [module, randomBytes(32).toString('hex')]))
 const users = {
   admin: { id: '1', roles: ['SYSTEM_ADMIN'], college_id: null, status: 'ACTIVE' },
-  college: { id: '2', roles: ['CLASSROOM_ADMIN'], college_id: '1', status: 'ACTIVE' },
-  other: { id: '3', roles: ['CLASSROOM_ADMIN'], college_id: '2', status: 'ACTIVE' },
+  college: { id: '2', roles: ['CLASSROOM_ADMIN'], permissions: ['resource:manage'], college_id: '1', status: 'ACTIVE' },
+  other: { id: '3', roles: ['CLASSROOM_ADMIN'], permissions: ['resource:manage'], college_id: '2', status: 'ACTIVE' },
   student: { id: '4', roles: ['STUDENT'], college_id: '1', status: 'ACTIVE' }
 }
 let pool, api, dependency, base, dependencyDown = false, sequence = 1000

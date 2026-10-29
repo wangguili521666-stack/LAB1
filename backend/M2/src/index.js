@@ -1,4 +1,5 @@
 import { createApp } from './app.js'
+import { closePool } from './db.js'
 import { config } from './config.js'
 import { expireOverdue } from './services/applications.js'
 
@@ -17,7 +18,7 @@ if (process.env.M2_DISABLE_SCHEDULER !== '1') {
 
 function shutdown() {
   if (timer) clearInterval(timer)
-  server.close()
+  server.close(() => { closePool().catch(() => { process.exitCode = 1 }) })
 }
 process.on('SIGTERM', shutdown)
 process.on('SIGINT', shutdown)

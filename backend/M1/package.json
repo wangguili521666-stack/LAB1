@@ -1,0 +1,15 @@
+{
+  "name": "m1-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "migrate": "node migrate.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.11.0",
+    "dotenv": "^16.4.5"
+  }
+}

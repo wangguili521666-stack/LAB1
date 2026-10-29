@@ -37,7 +37,7 @@ export function d1Authenticator({ baseUrl, timeoutMs = 3000, fetchImpl = fetch }
         BigInt(user.id) > 9223372036854775807n || !Array.isArray(user.roles) || !user.roles.every(role => typeof role === 'string') ||
         typeof user.status !== 'string') throw unavailable()
     if (user.status !== 'ACTIVE') throw new ApiError(403, 'FORBIDDEN', '账号未启用')
-    return { id: user.id, roles: user.roles }
+    return { id: user.id, roles: user.roles, ...(Array.isArray(user.permissions)?{permissions:user.permissions}:{}) }
   }
 }
 

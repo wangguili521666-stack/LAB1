@@ -1,247 +1,202 @@
-
 <script setup>
-import { ref } from 'vue'
-
-// 查询条件
-const startTime = ref('2026-10-23T09:00')
-const endTime = ref('2026-10-23T11:00')
-
-// 页面数据
-const seats = ref([])
-const bookings = ref([])
-const message = ref('')
-const loading = ref(false)
-
-// 将 datetime-local 转成带时区的 ISO 时间
-function toISO(localTime) {
-  return new Date(localTime).toISOString()
-}
-
-// 查询可用座位
-async function searchSeats() {
-  loading.value = true
-  message.value = ''
-
+import { ref, onMounted } from "vue";
+import { request } from "../utils/request.js";
+const types = ref([]),
+  tickets = ref([]),
+  detail = ref(null),
+  progress = ref([]),
+  message = ref(""),
+  busy = ref(false),
+  me = ref(null);
+const form = ref({
+  repair_type_id: "1",
+  classroom_id: "",
+  location_description: "",
+  description: "",
+});
+const manager = () =>
+  (me.value?.roles.includes("SYSTEM_ADMIN")||me.value?.permissions?.includes("repair:manage"));
+async function run(fn) {
+  if (busy.value) return;
+  busy.value = true;
+  message.value = "";
   try {
-    const params = new URLSearchParams({
-      start_time: toISO(startTime.value),
-      end_time: toISO(endTime.value)
-    })
-
-    const response = await fetch(
-      `/api/m1/seats/available?${params}`
-    )
-
-    if (!response.ok) {
-      throw new Error('查询失败')
-    }
-
-    const result = await response.json()
-    seats.value = result.data
-  } catch (error) {
-    message.value = error.message
+    await fn();
+  } catch (e) {
+    message.value = e.message;
   } finally {
-    loading.value = false
+    busy.value = false;
   }
 }
-
-// 预约指定座位
-async function bookSeat(seatId) {
-  message.value = ''
-
-  try {
-    const response = await fetch('/api/m1/bookings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({
-        seat_id: seatId,
-        start_time: toISO(startTime.value),
-        end_time: toISO(endTime.value)
-      })
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.message || '预约失败')
-    }
-
-    message.value = '预约成功！'
-    await searchSeats()
-    await loadBookings()
-  } catch (error) {
-    message.value = error.message
-  }
-}
-
-// 查看我的预约
-async function loadBookings() {
-  try {
-    const response = await fetch('/api/m1/bookings/me', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error('加载预约记录失败')
-    }
-
-    const result = await response.json()
-    bookings.value = result.data.items
-  } catch (error) {
-    message.value = error.message
-  }
-}
-
-// 取消预约
-async function cancelBooking(bookingId) {
-  try {
-    const response = await fetch(
-      `/api/m1/bookings/${bookingId}/cancel`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
+async function load() {
+  tickets.value = (
+    await request(
+      manager() || me.value?.permissions?.includes("repair:work")
+        ? "/api/m3/tickets"
+        : "/api/m3/tickets/me",
     )
-
-    if (!response.ok) {
-      throw new Error('取消失败')
+  ).items;
+}
+async function select(t) {
+  detail.value = await request("/api/m3/tickets/" + t.id);
+  progress.value = await request("/api/m3/tickets/" + t.id + "/progress");
+}
+async function create() {
+  await run(async () => {
+    const body = { ...form.value };
+    if (!body.classroom_id) delete body.classroom_id;
+    await request("/api/m3/tickets", { method: "POST", body });
+    message.value = "报修已提交";
+    await load();
+  });
+}
+async function act(action) {
+  await run(async () => {
+    let body = {};
+    if (action === "assign") {
+      const value = prompt("维修工用户 ID");
+      if (!value) return;
+      body.worker_id = value;
     }
-
-    message.value = '预约已取消'
-    await loadBookings()
-    await searchSeats()
-  } catch (error) {
-    message.value = error.message
-  }
+    if (action === "progress" || action === "finish") {
+      const value = prompt("维修进度说明");
+      if (value === null) return;
+      body.description = value;
+    }
+    if (action === "accept") {
+      body.accepted = confirm("验收是否通过？确定表示通过，取消表示返工");
+      if (!body.accepted) {
+        body.comment = prompt("返工原因");
+        if (!body.comment) return;
+      }
+    }
+    if (action === "review") {
+      body.rating = Number(prompt("评分（1–5）"));
+      body.comment = prompt("评价内容") || "";
+    }
+    await request(`/api/m3/tickets/${detail.value.id}/${action}`, {
+      method: "POST",
+      body,
+    });
+    await select(detail.value);
+    await load();
+  });
 }
+onMounted(() =>
+  run(async () => {
+    me.value = await request("/api/d1/users/me");
+    types.value = await request("/api/m3/repair-types");
+    await load();
+  }),
+);
 </script>
-
 <template>
-  <div class="m1-page">
-    <h1>自习座位预约</h1>
-
-    <!-- 查询条件 -->
+  <main>
+    <h1>物业报修</h1>
+    <p role="alert">{{ message }}</p>
+    <form @submit.prevent="create">
+      <h2>提交故障</h2>
+      <label
+        >故障类型<select v-model="form.repair_type_id">
+          <option v-for="t in types" :key="t.id" :value="t.id">
+            {{ t.type_name }}
+          </option>
+        </select></label
+      ><label>教室 ID（选填）<input v-model="form.classroom_id" /></label
+      ><label
+        >故障位置<input
+          required
+          maxlength="255"
+          v-model="form.location_description" /></label
+      ><label
+        >故障描述<textarea
+          required
+          v-model="form.description"
+        ></textarea></label
+      ><button :disabled="busy">提交报修</button>
+    </form>
     <section>
-      <h2>查询空闲座位</h2>
-
-      <label>
-        开始时间：
-        <input type="datetime-local" v-model="startTime" />
-      </label>
-
-      <label>
-        结束时间：
-        <input type="datetime-local" v-model="endTime" />
-      </label>
-
-      <button @click="searchSeats" :disabled="loading">
-        {{ loading ? '查询中...' : '查询座位' }}
-      </button>
-    </section>
-
-    <!-- 可预约座位 -->
-    <section>
-      <h2>可预约座位</h2>
-
-      <p v-if="seats.length === 0">暂无查询结果</p>
-
-      <div
-        v-for="seat in seats"
-        :key="seat.seat_id"
-        class="seat-card"
-      >
-        <span>
-          {{ seat.building }} ·
-          {{ seat.room_number }} ·
-          {{ seat.seat_number }} ·
-          {{ seat.socket_type }}
-        </span>
-
-        <button
-          @click="bookSeat(seat.seat_id)"
-          :disabled="!seat.available"
-        >
-          {{ seat.available ? '预约' : '不可预约' }}
+      <h2>工单记录</h2>
+      <button :disabled="busy" @click="run(load)">刷新</button>
+      <p v-if="!tickets.length">暂无工单</p>
+      <article v-for="t in tickets" :key="t.id">
+        <button @click="run(() => select(t))">
+          {{ t.location_description }} · {{ t.status }}
         </button>
-      </div>
+      </article>
     </section>
-
-    <!-- 我的预约 -->
-    <section>
-      <h2>我的预约</h2>
-
-      <button @click="loadBookings">
-        刷新预约记录
-      </button>
-
-      <div
-        v-for="booking in bookings"
-        :key="booking.id"
-        class="seat-card"
-      >
-        <span>
-          座位 {{ booking.seat_id }} |
-          {{ booking.start_time }} |
-          {{ booking.status }}
-        </span>
-
-        <button
-          v-if="booking.status === 'BOOKED'"
-          @click="cancelBooking(booking.id)"
+    <section v-if="detail">
+      <h2>工单详情</h2>
+      <p>{{ detail.description }}</p>
+      <p>
+        状态：{{ detail.status }} · 优先级：{{ detail.priority }} ·
+        同步待处理：{{ Boolean(detail.sync_pending) }}
+      </p>
+      <template v-if="!busy"
+        ><button
+          v-if="
+            manager() &&
+            ['PENDING_ASSIGNMENT', 'ASSIGNED'].includes(detail.status)
+          "
+          @click="act('assign')"
         >
-          取消
-        </button>
-      </div>
+          派单</button
+        ><template v-if="detail.assigned_to === me?.id"
+          ><button v-if="detail.status === 'ASSIGNED'" @click="act('start')">
+            开始维修</button
+          ><template v-if="detail.status === 'IN_PROGRESS'"
+            ><button @click="act('progress')">更新进度</button
+            ><button @click="act('finish')">提交完工</button></template
+          ></template
+        ><template v-if="detail.reporter_id === me?.id"
+          ><button
+            v-if="detail.status === 'PENDING_ACCEPTANCE'"
+            @click="act('accept')"
+          >
+            验收</button
+          ><button v-if="detail.status === 'COMPLETED'" @click="act('review')">
+            评价</button
+          ><button
+            v-if="detail.status === 'PENDING_ASSIGNMENT'"
+            @click="act('cancel')"
+          >
+            取消报修
+          </button></template
+        ></template
+      >
+      <ol>
+        <li v-for="p in progress" :key="p.id">
+          {{ p.created_at }} · {{ p.action_type }} · {{ p.description }}
+        </li>
+      </ol>
     </section>
-
-    <p class="message">{{ message }}</p>
-  </div>
+  </main>
 </template>
-
 <style scoped>
-.m1-page {
+main {
   max-width: 1000px;
-  margin: 30px auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  margin: 24px auto;
 }
-
+form,
 section {
-  margin-bottom: 30px;
-  padding: 20px;
+  padding: 24px;
+  margin: 16px 0;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 12px;
 }
-
 label {
-  display: inline-block;
-  margin: 10px;
+  display: block;
+  margin: 12px 0;
 }
-
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 8px;
+}
 button {
-  margin: 5px;
-  padding: 8px 15px;
-  cursor: pointer;
-}
-
-.seat-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  margin-top: 10px;
-  border: 1px solid #eee;
-  border-radius: 6px;
-}
-
-.message {
-  color: #2563eb;
+  margin: 6px;
+  padding: 8px 16px;
 }
 </style>

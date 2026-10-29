@@ -1,3 +1,4 @@
+import {permissions,active,problem} from '../rbac.js'
 import { Router } from 'express'
 import { pool } from '../db.js'
 import { ok, fail } from '../utils/response.js'
@@ -6,6 +7,7 @@ import { authRequired } from '../middleware/auth.js'
 
 const router = Router()
 router.use(authRequired)
+router.use((req,res,next)=>active(req.user.id).then(()=>next(),next))
 
 // 查询某个用户的私有资料（含角色），返回 UserPrivate 结构
 async function loadPrivate(userId) {
@@ -33,6 +35,7 @@ async function loadPrivate(userId) {
     phone: user.phone,
     status: user.status,
     roles: roleRows.map(r => r.role_code),
+    permissions: await permissions(userId),
     created_at: toIso(user.created_at)
   }
 }
@@ -73,4 +76,13 @@ router.patch('/me', async (req, res, next) => {
   }
 })
 
+router.get('/me/records', async(req,res,next)=>{try{
+  const type=req.query.type||'all',page=Number(req.query.page||1),size=Number(req.query.page_size||20);
+  const services={seat_bookings:['M1','/api/m1/bookings/me'],classroom_applications:['M2','/api/m2/applications/me'],repair_tickets:['M3','/api/m3/tickets/me']};
+  if(type!=='all'&&!Object.hasOwn(services,type))throw problem(400,'记录类型无效');
+  if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(size)||size<1||size>100)throw problem(400,'分页无效');
+  const selected=Object.entries(services).filter(([key])=>type==='all'||key===type);
+  const pairs=await Promise.all(selected.map(async([key,[module,path]])=>{try{const base=process.env[module+'_BASE_URL'];if(!base)throw Error();const r=await fetch(base+path+'?'+new URLSearchParams({page,page_size:size}),{headers:{Authorization:req.headers.authorization},signal:AbortSignal.timeout(5000),redirect:'error'});const j=await r.json();if(!r.ok||j.code!=='OK'||!Array.isArray(j.data?.items))throw Error();return [key,j.data]}catch{throw problem(503,module+' 记录服务暂不可用，请重试')}}));
+  res.json(ok(Object.fromEntries(pairs)));
+}catch(e){next(e)}});
 export default router

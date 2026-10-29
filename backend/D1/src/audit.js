@@ -1,0 +1,3 @@
+import {pool} from './db.js'
+let busy=false
+export async function deliverAudit(){if(busy||!process.env.D3_SERVICE_TOKEN||!process.env.D3_BASE_URL)return;busy=true;try{const [events]=await pool.query('SELECT * FROM rbac_audit_outbox WHERE sent=0 ORDER BY id LIMIT 30');for(const e of events){const r=await fetch(process.env.D3_BASE_URL+'/api/d3/internal/logs',{method:'POST',headers:{'Content-Type':'application/json','X-D3-Service-Token':process.env.D3_SERVICE_TOKEN},body:JSON.stringify(typeof e.payload==='string'?JSON.parse(e.payload):e.payload),signal:AbortSignal.timeout(3000),redirect:'error'});if(!r.ok)break;await pool.query('UPDATE rbac_audit_outbox SET sent=1 WHERE id=?',[e.id])}}catch{console.error('D1_AUDIT_RETRY')}finally{busy=false}}

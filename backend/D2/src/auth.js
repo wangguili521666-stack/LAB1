@@ -32,5 +32,5 @@ export function requireService(identity, modules) {
 
 export function requireReservationRead(identity) {
   if (identity.kind === 'service') return requireService(identity, ['M1', 'M2'])
-  if (!identity.roles.includes('SYSTEM_ADMIN') && !(identity.roles.includes('CLASSROOM_ADMIN') && identity.college_id)) throw forbidden()
+  if (!identity.roles.includes('SYSTEM_ADMIN') && !(identity.permissions?.includes('resource:manage') && identity.college_id)) throw forbidden()
 }

@@ -32,8 +32,8 @@ export function createApp({ store, authenticateUser, serviceTokens, clock, corsO
   })
   app.use(express.json({ limit: '64kb', strict: true }))
   const user = wrap(async (req, res, next) => { req.user = await authenticateUser(req.headers.authorization); next() })
-  const operator = (req, res, next) => { try { requireRole(req.user, ['SYSTEM_ADMIN', 'OPERATION_ADMIN']); next() } catch (error) { next(error) } }
-  const auditor = (req, res, next) => { try { requireRole(req.user, ['SYSTEM_ADMIN']); next() } catch (error) { next(error) } }
+  const operator = (req, res, next) => { try { if(!req.user.permissions?.includes('announcement:manage')) requireRole(req.user, ['SYSTEM_ADMIN']); next() } catch (error) { next(error) } }
+  const auditor = (req, res, next) => { try { if(!req.user.permissions?.includes('audit:read')) requireRole(req.user, ['SYSTEM_ADMIN']); next() } catch (error) { next(error) } }
   const internal = (req, res, next) => { try { req.service = serviceIdentity(req.headers['x-d3-service-token'], serviceTokens); next() } catch (error) { next(error) } }
 
   app.get('/api/d3/health', wrap(async (req, res) => {

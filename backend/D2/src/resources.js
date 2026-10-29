@@ -17,12 +17,12 @@ function classroom(row) {
 const seat = row => ({ ...row, id: String(row.id), classroom_id: String(row.classroom_id) })
 
 export function requireMaintenance(identity) {
-  if (!identity.roles.includes('SYSTEM_ADMIN') && !identity.roles.includes('CLASSROOM_ADMIN')) throw forbidden()
+  if (!identity.roles.includes('SYSTEM_ADMIN') && !(identity.permissions?.includes('resource:manage'))) throw forbidden()
 }
 
 export function requireCollege(identity, collegeId) {
   if (identity.roles.includes('SYSTEM_ADMIN')) return
-  if (!identity.roles.includes('CLASSROOM_ADMIN') || !identity.college_id || collegeId !== identity.college_id) throw forbidden()
+  if (!(identity.permissions?.includes('resource:manage')) || !identity.college_id || collegeId !== identity.college_id) throw forbidden()
 }
 
 async function loadClassroom(connection, classroomId, lock = false) {

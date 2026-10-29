@@ -36,7 +36,7 @@ export function createD1Client({ baseUrl, timeoutMs, fetchImpl = fetch }) {
       } catch { throw unavailable('D1') }
       if (user.status !== 'ACTIVE') throw forbidden()
       // 不保留不必要的用户资料。
-      return { id: user.id, college_id: user.college_id, roles: user.roles }
+      return { id: user.id, college_id: user.college_id, roles: user.roles, ...(Array.isArray(user.permissions)?{permissions:user.permissions}:{}) }
     },
     async validateCollege(collegeId, token) {
       const { response, body } = await get('/api/d1/colleges', token)
@@ -62,7 +62,7 @@ export function createD3Sender({ baseUrl, token, timeoutMs, fetchImpl = fetch })
     if (!baseUrl || !token) throw unavailable('D3')
     const { response, body } = await requestJson(baseUrl, '/api/d3/internal/logs', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'X-D3-Service-Token': token, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }, timeoutMs, fetchImpl)
     if (!response.ok || body?.code !== 'OK') throw unavailable('D3')

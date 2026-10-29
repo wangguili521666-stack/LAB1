@@ -37,7 +37,8 @@ test('D3 使用独立服务凭证，只认可契约成功响应', async () => {
   const send = createD3Sender({ baseUrl: 'http://d3.test', token: 'unit-service-token', timeoutMs: 100,
     fetchImpl: async (url, options) => {
       assert.equal(url.pathname, '/api/d3/internal/logs')
-      assert.equal(options.headers.Authorization, 'Bearer unit-service-token')
+      assert.equal(options.headers['X-D3-Service-Token'], 'unit-service-token')
+      assert.equal(options.headers.Authorization, undefined)
       assert.deepEqual(JSON.parse(options.body), payload)
       return reply(201, { id: '9007199254740993' })
     } })

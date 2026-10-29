@@ -27,9 +27,9 @@ const reports = []
 const users = {
   student: { id: '101', roles: ['STUDENT'], college_id: '1', status: 'ACTIVE' },
   sysadmin: { id: '102', roles: ['SYSTEM_ADMIN'], college_id: null, status: 'ACTIVE' },
-  own: { id: '103', roles: ['CLASSROOM_ADMIN'], college_id: '1', status: 'ACTIVE' },
-  other: { id: '104', roles: ['CLASSROOM_ADMIN'], college_id: '2', status: 'ACTIVE' },
-  unassigned: { id: '105', roles: ['CLASSROOM_ADMIN'], college_id: null, status: 'ACTIVE' },
+  own: { id: '103', roles: ['CLASSROOM_ADMIN'], permissions: ['resource:manage'], college_id: '1', status: 'ACTIVE' },
+  other: { id: '104', roles: ['CLASSROOM_ADMIN'], permissions: ['resource:manage'], college_id: '2', status: 'ACTIVE' },
+  unassigned: { id: '105', roles: ['CLASSROOM_ADMIN'], permissions: ['resource:manage'], college_id: null, status: 'ACTIVE' },
   disabled: { id: '106', roles: ['SYSTEM_ADMIN'], college_id: null, status: 'DISABLED' }
 }
 const roomBody = changes => ({ building: '教学楼A', room_number: '301', capacity: 30, is_bookable_whole: true,
@@ -86,7 +86,7 @@ before(async () => {
     }
     if (req.url === '/api/d3/internal/logs') {
       assert.equal(req.method, 'POST')
-      assert.equal(token, 'isolated-test-service-token')
+      assert.equal(req.headers['x-d3-service-token'], 'isolated-test-service-token')
       let body = ''
       for await (const chunk of req) body += chunk
       if (auditMode === 'down') return reply(503, null)

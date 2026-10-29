@@ -1,0 +1,6 @@
+INSERT IGNORE INTO permissions(permission_code,description) VALUES
+('classroom:apply','申请整教室'),('classroom:approve_l1','一级审批'),('classroom:approve_l2','二级审批'),('resource:manage','管理本学院教室与座位'),('booking:read','查看本学院预约和统计'),('booking:read_all','查看全校预约和统计'),('booking:configure','修改预约配置'),('checkin:display','展示本学院教室签到码'),('repair:manage','派单和查询工单'),('repair:work','维修工单'),('announcement:manage','管理公告'),('audit:read','查询审计日志');
+INSERT IGNORE INTO role_permissions(id_role,id_permissions) SELECT r.id,p.id FROM roles r CROSS JOIN permissions p WHERE r.role_code='SYSTEM_ADMIN' OR (r.role_code='TEACHER' AND p.permission_code='classroom:apply') OR (r.role_code='CLASSROOM_ADMIN' AND p.permission_code IN ('classroom:approve_l1','resource:manage','booking:read','checkin:display')) OR (r.role_code='OPERATION_ADMIN' AND p.permission_code IN ('booking:read_all','announcement:manage')) OR (r.role_code='PROPERTY_ADMIN' AND p.permission_code='repair:manage') OR (r.role_code='REPAIR_WORKER' AND p.permission_code='repair:work');
+CREATE TABLE IF NOT EXISTS rbac_lock(id INT PRIMARY KEY);
+INSERT IGNORE INTO rbac_lock VALUES(1);
+CREATE TABLE IF NOT EXISTS rbac_audit_outbox(id BIGINT PRIMARY KEY AUTO_INCREMENT,payload JSON NOT NULL,sent BOOLEAN NOT NULL DEFAULT 0);

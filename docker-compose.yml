@@ -16,6 +16,10 @@ services:
     environment:
       D1_API_TARGET: http://d1:3004
       M2_API_TARGET: http://m2:3002
+      M1_API_TARGET: http://m1:3001
+      M3_API_TARGET: http://m3:3003
+      D2_API_TARGET: http://d2:3005
+      D3_API_TARGET: http://d3:3006
       # Other backends/gateway are not implemented; opt in to a real gateway via .env.
       API_TARGET: ${API_TARGET:-http://127.0.0.1:8080}
       VITE_USE_POLLING: "true"
@@ -49,6 +53,12 @@ services:
       DB_PASSWORD: ${D1_DB_PASSWORD:?请配置 D1_DB_PASSWORD}
       DB_TIMEZONE: "+08:00"
       JWT_SECRET: ${D1_JWT_SECRET:?请先运行 ./start.sh 生成登录签名密钥}
+      M1_BASE_URL: http://m1:3001
+      M2_BASE_URL: http://m2:3002
+      M3_BASE_URL: http://m3:3003
+      D3_BASE_URL: http://d3:3006
+      D3_SERVICE_TOKEN: ${D3_D1_SERVICE_TOKEN:?}
+      D1_M2_SERVICE_TOKEN: ${D1_M2_SERVICE_TOKEN:?}
       JWT_EXPIRES_IN: "86400"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3004/api/d1/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
@@ -77,7 +87,9 @@ services:
       D1_BASE_URL: http://d1:3004
       D2_BASE_URL: http://d2:3005
       D3_BASE_URL: http://d3:3006
-      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-}
+      D1_SERVICE_TOKEN: ${D1_M2_SERVICE_TOKEN:?}
+      D2_SERVICE_TOKEN: ${D2_M2_SERVICE_TOKEN:?}
+      D3_SERVICE_TOKEN: ${D3_M2_SERVICE_TOKEN:?}
       M2_APPROVAL_TIMEOUT_HOURS: ${M2_APPROVAL_TIMEOUT_HOURS:-24}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/api/m2/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
@@ -86,9 +98,111 @@ services:
       retries: 6
       start_period: 30s
 
+  m1:
+    build: ./backend/M1
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3001"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_m1
+      DB_USER: m1_app
+      DB_PASSWORD: ${M1_DB_PASSWORD:?}
+      D1_BASE_URL: http://d1:3004
+      D2_BASE_URL: http://d2:3005
+      D3_BASE_URL: http://d3:3006
+      D2_SERVICE_TOKEN: ${D2_M1_SERVICE_TOKEN:?}
+      D3_SERVICE_TOKEN: ${D3_M1_SERVICE_TOKEN:?}
+      CHECKIN_SECRET: ${CHECKIN_SECRET:?}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/m1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  m3:
+    build: ./backend/M3
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3003"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_m3
+      DB_USER: m3_app
+      DB_PASSWORD: ${M3_DB_PASSWORD:?}
+      D1_BASE_URL: http://d1:3004
+      D2_BASE_URL: http://d2:3005
+      D3_BASE_URL: http://d3:3006
+      D2_SERVICE_TOKEN: ${D2_M3_SERVICE_TOKEN:?}
+      D3_SERVICE_TOKEN: ${D3_M3_SERVICE_TOKEN:?}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3003/api/m3/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  d2:
+    build: ./backend/D2
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3005"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_d2
+      DB_USER: d2_app
+      DB_PASSWORD: ${D2_DB_PASSWORD:?}
+      D1_BASE_URL: http://d1:3004
+      D3_BASE_URL: http://d3:3006
+      D3_SERVICE_TOKEN: ${D3_D2_SERVICE_TOKEN:?}
+      D2_M1_SERVICE_TOKEN: ${D2_M1_SERVICE_TOKEN:?}
+      D2_M2_SERVICE_TOKEN: ${D2_M2_SERVICE_TOKEN:?}
+      D2_M3_SERVICE_TOKEN: ${D2_M3_SERVICE_TOKEN:?}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3005/api/d2/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  d3:
+    build: ./backend/D3
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3006"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: campus_d3
+      DB_USER: d3_app
+      DB_PASSWORD: ${D3_DB_PASSWORD:?}
+      D1_BASE_URL: http://d1:3004
+      D3_SERVICE_TOKENS: '{"M1":"${D3_M1_SERVICE_TOKEN:?}","M2":"${D3_M2_SERVICE_TOKEN:?}","M3":"${D3_M3_SERVICE_TOKEN:?}","D2":"${D3_D2_SERVICE_TOKEN:?}","D1":"${D3_D1_SERVICE_TOKEN:?}"}'
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3006/api/d3/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
   mysql:
     image: mysql:8.0
-    container_name: campus-mysql
     restart: unless-stopped
     env_file:
       - .env

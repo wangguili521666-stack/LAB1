@@ -35,7 +35,9 @@ function loadEnv() {
   process.env.DB_USER = 'm2_app'
   process.env.DB_PASSWORD = values.M2_DB_PASSWORD
   process.env.JWT_SECRET = 'test-m2-secret'
-  process.env.INTERNAL_SERVICE_TOKEN = TOKEN
+  process.env.D1_SERVICE_TOKEN = TOKEN
+  process.env.D2_SERVICE_TOKEN = TOKEN
+  process.env.D3_SERVICE_TOKEN = TOKEN
   process.env.M2_APPROVAL_TIMEOUT_HOURS = '24'
   process.env.M2_DISABLE_SCHEDULER = '1'
 }

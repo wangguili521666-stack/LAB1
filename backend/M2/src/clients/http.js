@@ -3,9 +3,11 @@ import { HttpError } from '../utils/httpError.js'
 
 const PASS_THROUGH = new Set(['RESOURCE_CONFLICT', 'INVALID_STATE', 'DUPLICATE_OPERATION', 'NOT_FOUND', 'VALIDATION_ERROR'])
 
-export async function serviceRequest(baseUrl, path, { method = 'GET', body, timeout } = {}) {
+export async function serviceRequest(baseUrl, path, { method = 'GET', body, timeout, service = 'd2' } = {}) {
   const headers = { Accept: 'application/json' }
-  if (config.internalToken) headers['X-Service-Token'] = config.internalToken
+  if (service === 'd3') headers['X-D3-Service-Token'] = process.env.D3_SERVICE_TOKEN || ''
+  else if (service === 'd1') headers['X-Service-Token'] = process.env.D1_SERVICE_TOKEN || ''
+  else headers.Authorization = `Bearer ${process.env.D2_SERVICE_TOKEN || ''}`
   if (body !== undefined) headers['Content-Type'] = 'application/json'
 
   let response

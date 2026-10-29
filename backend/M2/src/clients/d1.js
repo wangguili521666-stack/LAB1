@@ -15,6 +15,7 @@ export async function authorize({ userId, permissionCode, resourceCollegeId }) {
   }
   const data = await serviceRequest(config.d1BaseUrl, '/api/d1/internal/authorize', {
     method: 'POST',
+    service: 'd1',
     body,
   })
   return { allowed: Boolean(data?.allowed), reason: data?.reason || null }

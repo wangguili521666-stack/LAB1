@@ -85,3 +85,7 @@ M1/M2/M3/D1/D2 → D3：POST /api/d3/internal/notifications，幂等提交站内
 调用方仍负责业务时机、收件人和可靠重试；D3 负责接收、去重、消息历史与已读状态。M1 的取消、违约与资源释放职责不变。
 通知使用 source_event_id、notification_type、recipient_user_ids 等字段，确切契约见 d3.md；此前 user_id/channel/template_code/payload 只是建议格式，未成为已实现接口。
 D3 内部接口使用每模块独立的 X-D3-Service-Token；个人接口使用 D1 的 Bearer 用户令牌。当前只接受 IN_APP，EMAIL/WECHAT 返回明确的未接入错误。
+
+## 2026-10-29 多模块认证基线
+
+详见 [服务认证矩阵](../architecture/service-auth.md)。M2 的 D1/D2/D3 调用分别使用 D1_SERVICE_TOKEN、D2_SERVICE_TOKEN、D3_SERVICE_TOKEN，不再共用 INTERNAL_SERVICE_TOKEN。D2 向 D3 发送 X-D3-Service-Token，禁止使用 Bearer 用户身份替代模块身份。

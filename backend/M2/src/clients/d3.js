@@ -16,6 +16,7 @@ export async function writeLog(entry) {
   try {
     await serviceRequest(config.d3BaseUrl, '/api/d3/internal/logs', {
       method: 'POST',
+      service: 'd3',
       body: payload,
       timeout: config.auditTimeoutMs,
     })
