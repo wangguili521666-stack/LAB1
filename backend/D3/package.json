@@ -1,0 +1,27 @@
+{
+  "name": "d3-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "D3 通知、个人消息、公告与操作审计",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "dev:mock": "node scripts/mock.js",
+    "dev:local": "node scripts/local.js",
+    "db:setup:local": "node scripts/setup-local-db.js",
+    "db:status:local": "node scripts/local-db-status.js",
+    "verify:local": "node scripts/verify-local.js",
+    "smoke:local": "node scripts/smoke.js --local",
+    "migrate": "node scripts/migrate.js",
+    "test": "node --test test/*.test.js",
+    "test:mysql:local": "node scripts/test-mysql-local.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.0"
+  }
+}

@@ -110,12 +110,14 @@ id	BIGINT PK	公告 ID
 title	VARCHAR(200)	标题
 content	TEXT	公告内容
 type	VARCHAR(30)	公告类型 NOTICE / MAINTENANCE / EMERGENCY
-publisher_id	BIGINT FK	发布人
+publisher_id	BIGINT	发布人（D1 逻辑引用，草稿时为创建人，发布时更新）
 status	VARCHAR(20)	DRAFT / PUBLISHED / WITHDRAWN
 published_at	DATETIME	发布时间
 expires_at	DATETIME	过期时间
 created_at	DATETIME	创建时间
 updated_at	DATETIME	修改时间
+
+首版 announcements 增补：created_by BIGINT、updated_by BIGINT、withdrawn_at DATETIME(3) NULL、version INT DEFAULT 1。修改、发布、撤回通过 version 防止并发覆盖，并与操作审计一起提交。
 
 
 2. operation_logs 操作日志表
@@ -128,9 +130,23 @@ target_type	VARCHAR(50)	操作对象类型
 target_id	BIGINT NULL	操作对象 ID
 request_method	VARCHAR(10)	GET / POST 等
 request_path	VARCHAR(255)	API 路径
-result	VARCHAR(20)	SUCCESS / FAILURE
+result	VARCHAR(20)	SUCCESS / FAILURE / DENIED
 ip_address	VARCHAR(45)	客户端 IP
-created_at	DATETIME	操作时间
+created_at	DATETIME	D3 接收记录时间
+
+首版 operation_logs 增补：source_event_id VARCHAR(128) NULL、actor_type VARCHAR(16)、occurred_at DATETIME(3)、trace_id VARCHAR(64) NULL、reason VARCHAR(1000) NULL、payload_hash CHAR(64)。UNIQUE(module, source_event_id) 支持重试去重；兼容旧调用省略事件 ID 时每次都追加。module 从调用服务凭据确定，user_id 由可信来源服务声明，D3 不声称独立验证上游的用户操作。日志无修改/删除 API。
+
+3. d3_notifications 通知事件快照
+字段：id BIGINT PK、source_module VARCHAR(16)、source_event_id VARCHAR(128)、notification_type VARCHAR(64)、biz_type VARCHAR(64)、biz_id VARCHAR(64)、title VARCHAR(200)、content TEXT、trace_id VARCHAR(64) NULL、payload_hash CHAR(64)、occurred_at/created_at DATETIME(3)、expires_at/invalidated_at DATETIME(3) NULL。
+UNIQUE(source_module, source_event_id, notification_type)；业务查询索引 (source_module, biz_type, biz_id, created_at, id)。幂等校验包含接收人集合和通知内容，trace_id 不影响幂等。
+
+4. d3_notification_recipients 用户消息与已读状态
+字段：id BIGINT PK（API 的消息 ID）、notification_id BIGINT FK（只关联 D3 内部通知表）、recipient_user_id BIGINT、created_at DATETIME(3)、read_at DATETIME(3) NULL。
+UNIQUE(notification_id, recipient_user_id)；用户时间与用户未读索引。read_at 只在第一次标记时写入，独立于通知是否过期/失效。
+
+后续外部渠道的投递任务表尚未创建；此前五表草案中的投递租约、重试和回执仍属于下一阶段设计，不代表首版已经实现。
+
+2026-10-28 本地开发环境：新增初始化入口创建 campus_d3_local 逻辑库和 d3_local_app 专用账号，使用相同的 001_d3_core.sql 迁移，不改变业务表结构。连接信息独立保存在 Git 忽略的 backend/D3/.env.local。团队环境仍通过 .env 配置目标库，不在业务代码中写死库名；本地假身份仅用于本机开发入口。
 
 
 

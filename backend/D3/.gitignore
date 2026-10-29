@@ -1,0 +1,5 @@
+.mock-session.json
+.mysql-test/
+coverage/
+.env.local
+.local/

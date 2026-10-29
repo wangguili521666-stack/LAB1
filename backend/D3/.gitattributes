@@ -1,0 +1,2 @@
+# 仅约束 D3 迁移，避免跨平台检出时改变文件换行。
+migrations/*.sql text eol=lf
