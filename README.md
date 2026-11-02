@@ -283,3 +283,13 @@ M2 独立测试会删除其测试库内申请记录，现要求显式设置 `M2_
 ## 统一自动测试入口
 
 根目录执行 `npm test`；完整数据库与跨模块检查执行 `npm run test:all`。测试日志保存在 `test-results/`。详见 [测试说明](docs/testing.md)。
+
+## 根目录一键构建
+
+安装 Node.js 22+（含 npm）后，在项目根目录执行：
+
+```bash
+npm run build
+```
+
+缺少 Vite 时自动执行前端 `npm ci`，首次安装需要联网。已有依赖发生变化时，先执行 `npm --prefix frontend ci`。构建产物输出到 `frontend/dist/`。后端是直接运行的 JavaScript，无需编译；该命令不启动服务或数据库，完整平台仍通过 `./start.sh` 启动。
