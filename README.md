@@ -19,7 +19,7 @@
 
 ## 二、架构
 
-- **单一 Vue 前端**（`frontend/`）：六个模块共用同一个 Vue Router，只挂 `/m1`、`/m2`、`/m3` 三个页面（D 模块无页面）。
+- **单一 Vue 前端**（`frontend/`）：六个模块共用同一个 Vue Router，包含业务大厅、登录、个人中心、消息、角色权限和签到屏幕。
 - **六个后端服务**（`backend/{M1,M2,M3,D1,D2,D3}`）：每个模块一个服务。
 - **单个 MySQL 实例 + 六独立库**：每模块一个 database（`campus_m1`…`campus_d3`）和一个「仅本库权限」的专属账号（`m1_app`…`d3_app`），互不影响。详见 [`db/README.md`](./db/README.md)。
 - **模块间只走 HTTP API**（`/api/{module}/...`），不得直连他人数据库表。
@@ -130,7 +130,7 @@ npm run dev
 ```
 
 启动脚本会尝试打开 Docker Desktop，首次运行生成缺失的本地配置和随机密钥，
-然后构建并启动 **MySQL → D1 用户后端、M2 教室申请后端 → 前端**。
+然后构建并启动 **MySQL → D1/D2/D3/M1/M2/M3 六个后端 → 前端**。
 数据库健康后，D1 自动执行现有版本化迁移；已执行的迁移会跳过。
 脚本保留已有 `.env`、数据库账号密码和数据卷，不清库或重置密码。
 本机无需安装 Node.js、npm；首次生成配置需要 openssl（macOS 已提供）。
@@ -169,7 +169,7 @@ docker compose ps
 docker compose logs --tail=80 d1 m2 mysql frontend
 ```
 
-三个服务应处于 `healthy` 状态；仅打开前端预览或单独运行前端，不能代替启动 D1 和 MySQL。
+MySQL、六个后端和前端均应处于 `healthy` 状态；仅打开前端预览或单独运行前端，不能代替启动 D1 和 MySQL。
 
 ### 日常使用
 
@@ -256,3 +256,26 @@ npm run dev:local
 - “教室签到屏幕”：SYSTEM_ADMIN 或有 checkin:display 权限的本学院管理人员输入教室 ID 后点击展示，可切换全屏投放在教室屏幕；六位编码每日北京时间零点自动更新。失联或权限失效时隐藏旧码。这里采用数字编码方案，不需要二维码。
 
 本轮新增迁移 backend/D1/migrations/003_rbac.sql；启动脚本会执行迁移并补充 D1→D3 独立密钥。请勿手工修改既有迁移或清空数据库。
+
+## 合并后回归验证
+
+使用 Node.js 22+，先安装各模块依赖。无需数据库的回归：
+
+```bash
+node --test backend/D2/tests/unit/*.test.js backend/D3/test/*.test.js backend/M1/test/*.test.js frontend/tests/*.test.mjs
+(cd frontend && npm run build)
+```
+
+真实六服务联调（需要已运行的 MySQL，根 `.env` 中的管理员配置仅用于创建独立测试库）：
+
+```bash
+docker compose up -d mysql
+TEST_DB_ENV_FILE=.env node scripts/local-integration.mjs
+```
+
+联调创建 `lab1_it_*` 独立库，不清理业务库；测试库保留以便排查。固定测试端口 19001–19006、15174 须空闲。
+M2 独立测试会删除其测试库内申请记录，现要求显式设置 `M2_TEST_DB_NAME=lab1_it_<标识>_m2`、`M2_TEST_DB_USER`、`M2_TEST_DB_PASSWORD`；可选 `M2_TEST_DB_HOST`、`M2_TEST_DB_PORT`。先创建独立测试库并授权，再执行 `(cd backend/M2 && npm test)`，禁止使用业务库。
+
+## 自动构建与测试（CodeArts）
+
+执行 `bash scripts/ci.sh full` 运行完整 CI；快速检查为 `bash scripts/ci.sh unit`。见 [CodeArts CI 说明](docs/codearts-ci.md)。

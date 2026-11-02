@@ -1,12 +1,8 @@
 import assert from 'node:assert/strict'
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { after, before, beforeEach, describe, test } from 'node:test'
 import jwt from 'jsonwebtoken'
 import { startStub } from './stub.mjs'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const START = '2026-12-01T09:00:00+08:00'
 const END = '2026-12-01T11:00:00+08:00'
 const TOKEN = 'test-internal-token'
@@ -19,21 +15,16 @@ let getPool
 let closePool
 
 function loadEnv() {
-  const file = path.join(root, '.env')
-  const text = fs.readFileSync(file, 'utf8')
-  const values = {}
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const index = trimmed.indexOf('=')
-    if (index > 0) values[trimmed.slice(0, index)] = trimmed.slice(index + 1)
-  }
-  if (!values.M2_DB_PASSWORD) throw new Error('根目录 .env 缺少 M2_DB_PASSWORD')
-  process.env.DB_HOST = '127.0.0.1'
-  process.env.DB_PORT = values.MYSQL_PORT || '3306'
-  process.env.DB_NAME = 'campus_m2'
-  process.env.DB_USER = 'm2_app'
-  process.env.DB_PASSWORD = values.M2_DB_PASSWORD
+  const database = process.env.M2_TEST_DB_NAME || ''
+  if (!/^lab1_it_[a-zA-Z0-9_]+_m2$/.test(database))
+    throw new Error('M2_TEST_DB_NAME must name a disposable lab1_it_*_m2 database; business databases are forbidden')
+  if (!process.env.M2_TEST_DB_USER || !process.env.M2_TEST_DB_PASSWORD)
+    throw new Error('Set M2_TEST_DB_USER and M2_TEST_DB_PASSWORD for the isolated test database')
+  process.env.DB_HOST = process.env.M2_TEST_DB_HOST || '127.0.0.1'
+  process.env.DB_PORT = process.env.M2_TEST_DB_PORT || '3306'
+  process.env.DB_NAME = database
+  process.env.DB_USER = process.env.M2_TEST_DB_USER
+  process.env.DB_PASSWORD = process.env.M2_TEST_DB_PASSWORD
   process.env.JWT_SECRET = 'test-m2-secret'
   process.env.D1_SERVICE_TOKEN = TOKEN
   process.env.D2_SERVICE_TOKEN = TOKEN

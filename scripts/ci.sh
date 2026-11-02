@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MODE="${1:-full}"
+case "$MODE" in full|unit) ;; *) echo 'Usage: bash scripts/ci.sh [full|unit]' >&2; exit 2;; esac
+node -e 'if (+process.versions.node.split(".")[0] < 22) throw Error("Node.js >=22 required")'
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/campus-ci.XXXXXXXX")"
+export COMPOSE_PROJECT_NAME="campus-ci-$(date +%s)-$$"
+export COMPOSE_FILE="$WORK/docker-compose.yml"
+started=0
+cleanup() {
+  result=$?
+  trap - EXIT
+  if [[ "$started" == 1 ]]; then
+    if [[ "$result" != 0 ]]; then docker compose logs --no-color --tail=80 >&2 || true; fi
+    docker compose down --volumes --remove-orphans || result=1
+  fi
+  rm -rf "$WORK"
+  exit "$result"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+# A clean copy prevents dotenv/test helpers from touching the developer database.
+tar -C "$ROOT" --exclude=node_modules --exclude=.env --exclude=.git --exclude=dist -cf - . | tar -C "$WORK" -xf -
+cd "$WORK"
+node --input-type=module <<'JS'
+import fs from 'node:fs';
+import { randomBytes } from 'node:crypto';
+const env=fs.readFileSync('.env.example','utf8').replace(/^([A-Z][A-Z0-9_]*)=(.*)$/gm,(line,key)=> /PASSWORD|SECRET|TOKEN/.test(key)?`${key}=${randomBytes(24).toString('hex')}`:line);
+fs.writeFileSync('.env',env+'\nFRONTEND_PORT=0\n', {mode:0o600});
+let compose=fs.readFileSync('docker-compose.yml','utf8');
+compose=compose.replace('${MYSQL_PORT:-3306}:3306','127.0.0.1::3306');
+fs.writeFileSync('docker-compose.yml',compose);
+JS
+for module in frontend backend/{D1,D2,D3,M1,M2,M3}; do
+  echo "=== Install and check: $module ==="
+  (cd "$module"; npm ci --no-audit --no-fund)
+  while IFS= read -r -d '' file; do node --check "$file"; done < <(find "$module/src" -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+done
+for module in frontend backend/{D1,D2,D3,M1,M3}; do
+  (cd "$module"; npm test)
+done
+(cd frontend; npm run build)
+if [[ "$MODE" == unit ]]; then
+  echo 'Unit/build checks passed; MySQL, M2 and Compose integration NOT run.'
+  exit 0
+fi
+docker compose version
+docker info >/dev/null
+docker compose config --quiet
+docker compose build
+started=1
+docker compose up -d --wait --wait-timeout 240
+mysql_port="$(docker compose port mysql 3306 | tail -1)"
+mysql_port="${mysql_port##*:}"
+# Provision a separate M2 test schema inside this disposable MySQL container.
+export M2_TEST_DB_HOST=127.0.0.1 M2_TEST_DB_PORT="$mysql_port"
+export M2_TEST_DB_NAME="lab1_it_ci_$$_m2" M2_TEST_DB_USER=ci_m2
+export M2_TEST_DB_PASSWORD="$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))")"
+node --input-type=module <<'JS'
+import { execFileSync } from 'node:child_process';
+const { M2_TEST_DB_NAME: db, M2_TEST_DB_PASSWORD: password } = process.env;
+if (!/^lab1_it_ci_[0-9]+_m2$/.test(db) || !/^[a-f0-9]{48}$/.test(password)) throw Error('Invalid CI database settings');
+const sql = `CREATE DATABASE ${db}; CREATE USER 'ci_m2'@'%' IDENTIFIED BY '${password}'; GRANT ALL ON ${db}.* TO 'ci_m2'@'%';`;
+execFileSync('docker', ['compose', 'exec', '-T', 'mysql', 'sh', '-c', 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root'], { input: sql, stdio: ['pipe', 'inherit', 'inherit'] });
+JS
+(cd backend/M2; npm test)
+(cd backend/D2; npm run test:integration)
+frontend_port="$(docker compose port frontend 5173 | tail -1)"
+TEST_BASE_URL="http://127.0.0.1:${frontend_port##*:}" node scripts/integration.mjs
+echo 'CI build, tests and Compose integration passed.'
