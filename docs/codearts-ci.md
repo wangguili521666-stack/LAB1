@@ -57,3 +57,9 @@ bash scripts/ci.sh unit
 云端构建环境无法通过修改仓库脚本自动切换；需要保存构建任务配置后重新运行。
 
 参考：[Npm 构建](https://support.huaweicloud.com/usermanual-codeci/codeci_ug_0007.html)、[构建工具版本](https://support.huaweicloud.com/productdesc-codeci/cloudbuild_07_0004.html)。
+
+## 生成部署源码包
+
+在同一个 Npm 构建步骤中使用 `set -e`，先运行 `npm test`（完整门禁使用 `npm run test:all`），成功后运行 `npm run package`。脚本将当前工作目录中的前后端源码、Dockerfile、Compose、数据库初始化及迁移文件打成 `artifacts/lab1-*.tar.gz`，同时生成 `.sha256` 校验文件。排除 .env 及其本地变体、node_modules、日志、Git 元数据和测试产物；保留 .env.example。release.json 记录提交号及打包时间，包内容来自工作目录，不保证等同于已提交版本。
+
+增加“上传软件包到软件发布库”构建步骤，配置路径 `artifacts/*`。部署任务选择本次构建产物下载，校验后解压，单独配置主机 .env，再执行 Compose 构建。它是需要在服务器构建镜像的源码包，不是 Docker 镜像包或已适配公网的生产发行包。现有前端仍为 Vite 开发服务器，正式上线需调整 Nginx 与访问入口。

@@ -10,6 +10,7 @@
     "test": "bash scripts/test.sh unit",
     "test:unit": "bash scripts/test.sh unit",
     "test:all": "bash scripts/test.sh full",
-    "ci": "bash scripts/test.sh full"
+    "ci": "bash scripts/test.sh full",
+    "package": "node scripts/package.mjs"
   }
 }

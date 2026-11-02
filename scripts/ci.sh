@@ -61,7 +61,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 # A clean copy prevents dotenv/test helpers from touching the developer database.
-tar -C "$ROOT" --exclude=node_modules --exclude=.env --exclude=.git --exclude=dist --exclude=test-results --exclude=.local-logs -cf - . | tar -C "$WORK" -xf -
+tar -C "$ROOT" --exclude=node_modules --exclude=.env --exclude=.git --exclude=dist --exclude=artifacts --exclude=test-results --exclude=.local-logs -cf - . | tar -C "$WORK" -xf -
 cd "$WORK"
 node --input-type=module <<'JS'
 import fs from 'node:fs';

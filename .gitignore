@@ -15,3 +15,6 @@ dist/
 
 # 自动测试运行日志
 test-results/
+
+# 部署源码包
+artifacts/
