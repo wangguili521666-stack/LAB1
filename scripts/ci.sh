@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+# Prevent package scripts from recursively re-entering the CI pipeline.
+if [[ "${LAB1_CI_ACTIVE:-0}" == 1 ]]; then
+  echo '检测到 CI 递归调用：ci.sh 内不能调用根目录的 npm test、npm run test:all 或 npm run ci。' >&2
+  exit 2
+fi
+export LAB1_CI_ACTIVE=1
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="${1:-full}"
 case "$MODE" in full|unit) ;; *) echo 'Usage: bash scripts/ci.sh [full|unit]' >&2; exit 2;; esac
@@ -20,12 +26,33 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/campus-ci.XXXXXXXX")"
 export COMPOSE_PROJECT_NAME="campus-ci-$(date +%s)-$$"
 export COMPOSE_FILE="$WORK/docker-compose.yml"
 started=0
+build_started=0
+# Explicit per-run image tags allow safe cleanup without touching base images.
+image_services=(frontend d1 d2 d3 m1 m2 m3)
 cleanup() {
   result=$?
   trap - EXIT
   if [[ "$started" == 1 ]]; then
     if [[ "$result" != 0 ]]; then docker compose logs --no-color --tail=80 >&2 || true; fi
-    docker compose down --volumes --remove-orphans || result=1
+    if ! docker compose down --volumes --remove-orphans; then
+      echo "测试容器清理失败，请检查项目 $COMPOSE_PROJECT_NAME" >&2
+      [[ "$result" != 0 ]] || result=1
+    fi
+  fi
+  if [[ "$build_started" == 1 ]]; then
+    for service in "${image_services[@]}"; do
+      tag="${COMPOSE_PROJECT_NAME}-${service}:latest"
+      # Some services may not have built when the build command fails.
+      if docker image inspect "$tag" >/dev/null 2>&1; then
+        if ! docker image rm "$tag"; then
+          echo "测试镜像清理失败: ${tag}（不强制删除仍被使用的镜像）" >&2
+          [[ "$result" != 0 ]] || result=1
+        fi
+      elif ! docker info >/dev/null 2>&1; then
+        echo 'Docker 服务不可用，无法确认测试镜像是否已清理。' >&2
+        [[ "$result" != 0 ]] || result=1
+      fi
+    done
   fi
   rm -rf "$WORK"
   exit "$result"
@@ -43,6 +70,12 @@ const env=fs.readFileSync('.env.example','utf8').replace(/^([A-Z][A-Z0-9_]*)=(.*
 fs.writeFileSync('.env',env+'\nFRONTEND_PORT=0\n', {mode:0o600});
 let compose=fs.readFileSync('docker-compose.yml','utf8');
 compose=compose.replace('${MYSQL_PORT:-3306}:3306','127.0.0.1::3306');
+// Pin names to this run; only these seven tags will be removed on exit.
+for (const service of ['frontend','d1','d2','d3','m1','m2','m3']) {
+  const marker = `  ${service}:\n`;
+  if (!compose.includes(marker)) throw Error(`Missing Compose service: ${service}`);
+  compose = compose.replace(marker, `${marker}    image: ${process.env.COMPOSE_PROJECT_NAME}-${service}:latest\n`);
+}
 fs.writeFileSync('docker-compose.yml',compose);
 JS
 for module in frontend backend/{D1,D2,D3,M1,M2,M3}; do
@@ -61,9 +94,12 @@ fi
 docker compose version
 docker info >/dev/null
 docker compose config --quiet
-docker compose build
+# Reuse local base images and BuildKit layers; do not use --pull or --no-cache.
+# Enable cleanup BEFORE building, including partial-build failures.
+build_started=1
+DOCKER_BUILDKIT=1 docker compose build
 started=1
-docker compose up -d --wait --wait-timeout 240
+docker compose up -d --no-build --wait --wait-timeout 240
 mysql_port="$(docker compose port mysql 3306 | tail -1)"
 mysql_port="${mysql_port##*:}"
 # Provision a separate M2 test schema inside this disposable MySQL container.
@@ -82,5 +118,3 @@ JS
 frontend_port="$(docker compose port frontend 5173 | tail -1)"
 TEST_BASE_URL="http://127.0.0.1:${frontend_port##*:}" node scripts/integration.mjs
 echo 'CI build, tests and Compose integration passed.'
-echo 'test begin.'
-npm run test:all
