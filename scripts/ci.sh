@@ -3,7 +3,19 @@ set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="${1:-full}"
 case "$MODE" in full|unit) ;; *) echo 'Usage: bash scripts/ci.sh [full|unit]' >&2; exit 2;; esac
+for tool in node npm tar; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "CI 环境缺少 $tool。请在 CodeArts 的 Npm 构建步骤选择 Node.js 22 或更高版本，并在同一步骤执行本脚本；完整模式还要求 Docker 服务和 Compose。详见 docs/codearts-ci.md。" >&2
+    exit 127
+  fi
+done
 node -e 'if (+process.versions.node.split(".")[0] < 22) throw Error("Node.js >=22 required")'
+if [[ "$MODE" == full ]]; then
+  if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+    echo '完整 CI 需要可用的 Docker Engine 和 Compose。请配置支持 Docker 的执行机；仅验证单元测试与前端构建可显式使用 unit 模式。' >&2
+    exit 1
+  fi
+fi
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/campus-ci.XXXXXXXX")"
 export COMPOSE_PROJECT_NAME="campus-ci-$(date +%s)-$$"
 export COMPOSE_FILE="$WORK/docker-compose.yml"
@@ -22,7 +34,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 # A clean copy prevents dotenv/test helpers from touching the developer database.
-tar -C "$ROOT" --exclude=node_modules --exclude=.env --exclude=.git --exclude=dist -cf - . | tar -C "$WORK" -xf -
+tar -C "$ROOT" --exclude=node_modules --exclude=.env --exclude=.git --exclude=dist --exclude=test-results --exclude=.local-logs -cf - . | tar -C "$WORK" -xf -
 cd "$WORK"
 node --input-type=module <<'JS'
 import fs from 'node:fs';

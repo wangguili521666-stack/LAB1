@@ -12,3 +12,6 @@ dist/
 *.log
 
 .local-logs/
+
+# 自动测试运行日志
+test-results/

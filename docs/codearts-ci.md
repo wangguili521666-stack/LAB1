@@ -38,3 +38,22 @@ bash lab1-integration/scripts/ci.sh full
 - [流水线官方插件（Build 构建）](https://support.huaweicloud.com/usermanual-pipeline/pipeline_01_0030.html)
 
 尚未登录或修改云端项目：以上控制台配置需要在有权限的 CodeArts 项目内完成。
+
+## node: command not found
+
+此错误发生在安装依赖前，表示当前步骤的 PATH 中找不到 Node.js。普通 Shell 构建环境不保证包含 Node.js；之前直接使用 Shell 步骤的说明以执行机已安装 Node.js 为前提。
+
+在 CodeArts Build 编辑构建步骤，使用「Npm 构建」，工具版本选择 Node.js 22 或更高版本。在该步骤内执行（不要切回另一个普通 Shell 步骤）：
+
+```bash
+set -e
+node --version
+npm --version
+bash scripts/ci.sh unit
+```
+
+这用于先验证无需 Docker 的部分。完整门禁仍须使用 `full`：执行环境必须同时具备 Node.js >=22、npm、Docker Engine 和 Compose。若当前区域的 Npm 版本列表没有 >=22 的版本，或构建环境不能连接 Docker daemon，请使用安装了这些工具的自定义执行机。不要为了通过检查降到 Node.js 18/20，本项目部分服务要求 >=22。
+
+云端构建环境无法通过修改仓库脚本自动切换；需要保存构建任务配置后重新运行。
+
+参考：[Npm 构建](https://support.huaweicloud.com/usermanual-codeci/codeci_ug_0007.html)、[构建工具版本](https://support.huaweicloud.com/productdesc-codeci/cloudbuild_07_0004.html)。

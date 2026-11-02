@@ -279,3 +279,7 @@ M2 独立测试会删除其测试库内申请记录，现要求显式设置 `M2_
 ## 自动构建与测试（CodeArts）
 
 执行 `bash scripts/ci.sh full` 运行完整 CI；快速检查为 `bash scripts/ci.sh unit`。见 [CodeArts CI 说明](docs/codearts-ci.md)。
+
+## 统一自动测试入口
+
+根目录执行 `npm test`；完整数据库与跨模块检查执行 `npm run test:all`。测试日志保存在 `test-results/`。详见 [测试说明](docs/testing.md)。

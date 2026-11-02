@@ -1,0 +1,15 @@
+{
+  "name": "lab1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "校园资源平台统一测试入口",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "bash scripts/test.sh unit",
+    "test:unit": "bash scripts/test.sh unit",
+    "test:all": "bash scripts/test.sh full",
+    "ci": "bash scripts/test.sh full"
+  }
+}
