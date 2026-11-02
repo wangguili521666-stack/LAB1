@@ -82,3 +82,5 @@ JS
 frontend_port="$(docker compose port frontend 5173 | tail -1)"
 TEST_BASE_URL="http://127.0.0.1:${frontend_port##*:}" node scripts/integration.mjs
 echo 'CI build, tests and Compose integration passed.'
+echo 'test begin.'
+npm run test:all
