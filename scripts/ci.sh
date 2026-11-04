@@ -15,6 +15,8 @@ for tool in node npm tar; do
     exit 127
   fi
 done
+node "$ROOT/scripts/requirements-check.mjs"
+node --test "$ROOT/scripts/requirements-check.test.mjs"
 node -e 'if (+process.versions.node.split(".")[0] < 22) throw Error("Node.js >=22 required")'
 if [[ "$MODE" == full ]]; then
   if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
@@ -86,6 +88,8 @@ done
 for module in frontend backend/{D1,D2,D3,M1,M3}; do
   (cd "$module"; npm test)
 done
+mkdir -p test-results
+node scripts/mutation.mjs
 (cd frontend; npm run build)
 if [[ "$MODE" == unit ]]; then
   echo 'Unit/build checks passed; MySQL, M2 and Compose integration NOT run.'

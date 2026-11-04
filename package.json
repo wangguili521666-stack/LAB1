@@ -13,6 +13,11 @@
     "ci": "bash scripts/test.sh full",
     "package": "node scripts/package.mjs",
     "build": "node scripts/build.mjs",
-    "db:replay": "bash scripts/db-replay.sh"
+    "db:replay": "bash scripts/db-replay.sh",
+    "requirements:check": "node scripts/requirements-check.mjs",
+    "test:mutation": "node scripts/mutation.mjs",
+    "infra:up": "bash scripts/infra.sh up",
+    "infra:status": "bash scripts/infra.sh status",
+    "infra:stop": "bash scripts/infra.sh stop"
   }
 }

@@ -1,0 +1,2100 @@
+{
+  "version": 1,
+  "requirements": [
+    {
+      "id": "M1-01",
+      "title": "用户查看指定教室的座位",
+      "acceptance": "正确展示座位列表及使用状态",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查看指定教室的座位”，检查响应、持久化结果和权限边界满足：正确展示座位列表及使用状态。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-02",
+      "title": "用户查询指定时间段的空闲座位",
+      "acceptance": "返回 D2 判定的可预约座位",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询指定时间段的空闲座位”，检查响应、持久化结果和权限边界满足：返回 D2 判定的可预约座位。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-03",
+      "title": "用户预约空闲座位",
+      "acceptance": "成功生成预约记录，状态为已预约",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户预约空闲座位”，检查响应、持久化结果和权限边界满足：成功生成预约记录，状态为已预约。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-04",
+      "title": "用户预约已被占用的座位",
+      "acceptance": "预约失败，提示时间冲突",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户预约已被占用的座位”，检查响应、持久化结果和权限边界满足：预约失败，提示时间冲突。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-05",
+      "title": "用户取消自己的预约",
+      "acceptance": "预约状态变为已取消，D2 释放资源",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户取消自己的预约”，检查响应、持久化结果和权限边界满足：预约状态变为已取消，D2 释放资源。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-06",
+      "title": "用户取消他人的预约",
+      "acceptance": "操作被拒绝，返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户取消他人的预约”，检查响应、持久化结果和权限边界满足：操作被拒绝，返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-07",
+      "title": "用户查看个人预约记录",
+      "acceptance": "正确展示历史及当前预约",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查看个人预约记录”，检查响应、持久化结果和权限边界满足：正确展示历史及当前预约。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M1-08",
+      "title": "两名用户同时预约同一座位",
+      "acceptance": "只能有一人预约成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“两名用户同时预约同一座位”，检查响应、持久化结果和权限边界满足：只能有一人预约成功。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-01",
+      "title": "无申请权限的普通用户申请整教室",
+      "acceptance": "系统拒绝申请，返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“无申请权限的普通用户申请整教室”，检查响应、持久化结果和权限边界满足：系统拒绝申请，返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-02",
+      "title": "有权限用户申请空闲教室",
+      "acceptance": "生成申请记录，进入一级待审批",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“有权限用户申请空闲教室”，检查响应、持久化结果和权限边界满足：生成申请记录，进入一级待审批。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-03",
+      "title": "用户申请与已有预约冲突的教室",
+      "acceptance": "申请失败，提示资源冲突",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户申请与已有预约冲突的教室”，检查响应、持久化结果和权限边界满足：申请失败，提示资源冲突。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-04",
+      "title": "一级审批人通过申请",
+      "acceptance": "申请进入二级待审批",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“一级审批人通过申请”，检查响应、持久化结果和权限边界满足：申请进入二级待审批。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-05",
+      "title": "二级审批人通过申请",
+      "acceptance": "申请状态变为已通过，D2 确认资源占用",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“二级审批人通过申请”，检查响应、持久化结果和权限边界满足：申请状态变为已通过，D2 确认资源占用。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-06",
+      "title": "任意一级审批人驳回申请",
+      "acceptance": "申请状态变为已驳回，记录原因并释放资源",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“任意一级审批人驳回申请”，检查响应、持久化结果和权限边界满足：申请状态变为已驳回，记录原因并释放资源。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-07",
+      "title": "非对应级别审批人尝试审批",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“非对应级别审批人尝试审批”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-08",
+      "title": "一级或二级审批超过规定时限",
+      "acceptance": "定时任务自动将申请置为拒绝（REJECTED）并释放资源",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“一级或二级审批超过规定时限”，检查响应、持久化结果和权限边界满足：定时任务自动将申请置为拒绝（REJECTED）并释放资源。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-09",
+      "title": "用户主动撤销待审批申请",
+      "acceptance": "申请终止，无法继续审批",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户主动撤销待审批申请”，检查响应、持久化结果和权限边界满足：申请终止，无法继续审批。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-10",
+      "title": "用户查询本人教室申请",
+      "acceptance": "正确显示审批状态、审批意见和申请历史",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询本人教室申请”，检查响应、持久化结果和权限边界满足：正确显示审批状态、审批意见和申请历史。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M2-11",
+      "title": "多个审批操作同时处理同一申请",
+      "acceptance": "只有一次合法状态转换生效",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“多个审批操作同时处理同一申请”，检查响应、持久化结果和权限边界满足：只有一次合法状态转换生效。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-01",
+      "title": "用户提交完整报修信息",
+      "acceptance": "成功生成待派单工单",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户提交完整报修信息”，检查响应、持久化结果和权限边界满足：成功生成待派单工单。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-02",
+      "title": "用户提交缺少故障位置的报修",
+      "acceptance": "拒绝提交，提示必填字段",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户提交缺少故障位置的报修”，检查响应、持久化结果和权限边界满足：拒绝提交，提示必填字段。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-03",
+      "title": "物业管理员向维修人员派单",
+      "acceptance": "工单状态变为已派单，关联维修人员",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“物业管理员向维修人员派单”，检查响应、持久化结果和权限边界满足：工单状态变为已派单，关联维修人员。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-04",
+      "title": "普通用户尝试派单",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户尝试派单”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-05",
+      "title": "维修人员开始处理自己的工单",
+      "acceptance": "工单状态变为维修中",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“维修人员开始处理自己的工单”，检查响应、持久化结果和权限边界满足：工单状态变为维修中。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-06",
+      "title": "维修人员更新进度并提交完工",
+      "acceptance": "进度正常保存，完工后进入待验收",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“维修人员更新进度并提交完工”，检查响应、持久化结果和权限边界满足：进度正常保存，完工后进入待验收。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-07",
+      "title": "工单超过规定维修时限",
+      "acceptance": "自动标记超时升级，管理员可查询",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“工单超过规定维修时限”，检查响应、持久化结果和权限边界满足：自动标记超时升级，管理员可查询。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-08",
+      "title": "报修用户验收通过",
+      "acceptance": "工单状态变为已完成",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“报修用户验收通过”，检查响应、持久化结果和权限边界满足：工单状态变为已完成。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-09",
+      "title": "报修用户验收不通过",
+      "acceptance": "返回维修中，并保存返工原因",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“报修用户验收不通过”，检查响应、持久化结果和权限边界满足：返回维修中，并保存返工原因。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-10",
+      "title": "用户对已完成工单评价",
+      "acceptance": "评价保存成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户对已完成工单评价”，检查响应、持久化结果和权限边界满足：评价保存成功。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-11",
+      "title": "用户重复评价同一工单",
+      "acceptance": "系统拒绝重复提交",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户重复评价同一工单”，检查响应、持久化结果和权限边界满足：系统拒绝重复提交。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "M3-12",
+      "title": "用户查询个人报修记录",
+      "acceptance": "正确显示工单状态、处理过程及评价",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询个人报修记录”，检查响应、持久化结果和权限边界满足：正确显示工单状态、处理过程及评价。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-01",
+      "title": "使用合法用户名、密码注册",
+      "acceptance": "注册成功，分配默认用户角色",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“使用合法用户名、密码注册”，检查响应、持久化结果和权限边界满足：注册成功，分配默认用户角色。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-02",
+      "title": "使用重复用户名注册",
+      "acceptance": "注册失败，提示用户名已存在",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“使用重复用户名注册”，检查响应、持久化结果和权限边界满足：注册失败，提示用户名已存在。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-03",
+      "title": "使用正确凭证登录",
+      "acceptance": "登录成功，返回有效认证凭证",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“使用正确凭证登录”，检查响应、持久化结果和权限边界满足：登录成功，返回有效认证凭证。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-04",
+      "title": "使用错误密码登录",
+      "acceptance": "登录失败，返回 401",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“使用错误密码登录”，检查响应、持久化结果和权限边界满足：登录失败，返回 401。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-05",
+      "title": "未登录访问受保护接口",
+      "acceptance": "返回 401",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“未登录访问受保护接口”，检查响应、持久化结果和权限边界满足：返回 401。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-06",
+      "title": "普通用户尝试修改自己的角色",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户尝试修改自己的角色”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-07",
+      "title": "管理员修改用户角色",
+      "acceptance": "修改成功，新权限按规则生效",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员修改用户角色”，检查响应、持久化结果和权限边界满足：修改成功，新权限按规则生效。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-08",
+      "title": "用户查询本人公开和私有资料",
+      "acceptance": "正确返回授权范围内的信息",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询本人公开和私有资料”，检查响应、持久化结果和权限边界满足：正确返回授权范围内的信息。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-09",
+      "title": "用户查询他人私有资料",
+      "acceptance": "拒绝访问",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询他人私有资料”，检查响应、持久化结果和权限边界满足：拒绝访问。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-10",
+      "title": "用户修改昵称或联系方式",
+      "acceptance": "更新成功，再次查询显示新数据",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户修改昵称或联系方式”，检查响应、持久化结果和权限边界满足：更新成功，再次查询显示新数据。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-11",
+      "title": "用户修改密码",
+      "acceptance": "原密码验证通过后修改成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户修改密码”，检查响应、持久化结果和权限边界满足：原密码验证通过后修改成功。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-12",
+      "title": "用户查询个人预约与申请记录",
+      "acceptance": "正确聚合 M1、M2、M3 的个人业务记录",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户查询个人预约与申请记录”，检查响应、持久化结果和权限边界满足：正确聚合 M1、M2、M3 的个人业务记录。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-13",
+      "title": "禁用用户尝试登录",
+      "acceptance": "登录被拒绝",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“禁用用户尝试登录”，检查响应、持久化结果和权限边界满足：登录被拒绝。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-01",
+      "title": "管理员新增教室",
+      "acceptance": "新教室成功入库并可查询",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员新增教室”，检查响应、持久化结果和权限边界满足：新教室成功入库并可查询。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-02",
+      "title": "管理员为教室新增座位",
+      "acceptance": "座位成功关联对应教室",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员为教室新增座位”，检查响应、持久化结果和权限边界满足：座位成功关联对应教室。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-03",
+      "title": "查询空闲时间段的资源",
+      "acceptance": "返回可用状态",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“查询空闲时间段的资源”，检查响应、持久化结果和权限边界满足：返回可用状态。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-04",
+      "title": "查询已占用时间段的资源",
+      "acceptance": "返回不可用及冲突原因",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“查询已占用时间段的资源”，检查响应、持久化结果和权限边界满足：返回不可用及冲突原因。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-05",
+      "title": "同一座位发生时间重叠预约",
+      "acceptance": "拒绝第二个冲突预占",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“同一座位发生时间重叠预约”，检查响应、持久化结果和权限边界满足：拒绝第二个冲突预占。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-06",
+      "title": "整教室预约与教室内座位预约重叠",
+      "acceptance": "拒绝冲突预占",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“整教室预约与教室内座位预约重叠”，检查响应、持久化结果和权限边界满足：拒绝冲突预占。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-07",
+      "title": "不同座位在同一时间预约",
+      "acceptance": "均可成功（无其他冲突时）",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“不同座位在同一时间预约”，检查响应、持久化结果和权限边界满足：均可成功（无其他冲突时）。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-08",
+      "title": "M1/M2 创建合法资源预占",
+      "acceptance": "成功生成 HELD 记录",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“M1/M2 创建合法资源预占”，检查响应、持久化结果和权限边界满足：成功生成 HELD 记录。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-09",
+      "title": "M2 审批通过后确认预占",
+      "acceptance": "资源状态变为 CONFIRMED",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“M2 审批通过后确认预占”，检查响应、持久化结果和权限边界满足：资源状态变为 CONFIRMED。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-10",
+      "title": "M2 驳回或撤销后释放预占",
+      "acceptance": "预占变为 RELEASED，资源重新可预约",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“M2 驳回或撤销后释放预占”，检查响应、持久化结果和权限边界满足：预占变为 RELEASED，资源重新可预约。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-11",
+      "title": "多个请求并发预约同一资源",
+      "acceptance": "最多一个冲突请求预占成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“多个请求并发预约同一资源”，检查响应、持久化结果和权限边界满足：最多一个冲突请求预占成功。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-12",
+      "title": "管理员停用教室或座位",
+      "acceptance": "不再接受新的预约",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员停用教室或座位”，检查响应、持久化结果和权限边界满足：不再接受新的预约。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-13",
+      "title": "非授权用户调用资源维护接口",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“非授权用户调用资源维护接口”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-14",
+      "title": "预占到期且未确认",
+      "acceptance": "按有效期规则自动释放",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“预占到期且未确认”，检查响应、持久化结果和权限边界满足：按有效期规则自动释放。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-15",
+      "title": "同教室多个维修工单同时生效，逐一验收",
+      "acceptance": "首个验收不恢复，全部结束且无手动维护/停用后才可新预约，已有占用保留",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“同教室多个维修工单同时生效，逐一验收”，检查响应、持久化结果和权限边界满足：首个验收不恢复，全部结束且无手动维护/停用后才可新预约，已有占用保留。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-16",
+      "title": "维修消息重复、乱序、返工或同版本冲突",
+      "acceptance": "同版本同内容幂等，旧版本忽略，冲突返回 409，更高版本返工重新阻塞",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“维修消息重复、乱序、返工或同版本冲突”，检查响应、持久化结果和权限边界满足：同版本同内容幂等，旧版本忽略，冲突返回 409，更高版本返工重新阻塞。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-17",
+      "title": "确认、释放与过期任务并发处理同一 HELD",
+      "acceptance": "只产生合法状态转换，过期或释放后不能再次确认",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“确认、释放与过期任务并发处理同一 HELD”，检查响应、持久化结果和权限边界满足：只产生合法状态转换，过期或释放后不能再次确认。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-18",
+      "title": "同 source_module/source_id 并发重试预占",
+      "acceptance": "同参只生成一条记录，参数冲突返回 409，释放后不复活",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“同 source_module/source_id 并发重试预占”，检查响应、持久化结果和权限边界满足：同参只生成一条记录，参数冲突返回 409，释放后不复活。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-19",
+      "title": "查询或预占跨午夜、闭馆及相邻时段",
+      "acceptance": "按已确认的业务时区及开放窗口校验，相邻区间不冲突",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“查询或预占跨午夜、闭馆及相邻时段”，检查响应、持久化结果和权限边界满足：按已确认的业务时区及开放窗口校验，相邻区间不冲突。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D2-20",
+      "title": "用户或错误模块尝试读写其他模块占用/同步维修",
+      "acceptance": "返回 401/403；管理员读取按学院范围过滤，不能绕过源模块操作占用",
+      "source": "docs/requirements/demands.md",
+      "owner": "D2",
+      "implementation": [
+        "backend/D2/src/occupancy.js",
+        "backend/D2/src/maintenance.js",
+        "backend/D2/src/app.js"
+      ],
+      "verification": [
+        "backend/D2/tests/integration/resources.test.js",
+        "backend/D2/tests/integration/occupancy.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户或错误模块尝试读写其他模块占用/同步维修”，检查响应、持久化结果和权限边界满足：返回 401/403；管理员读取按学院范围过滤，不能绕过源模块操作占用。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-01",
+      "title": "管理员创建公告草稿",
+      "acceptance": "保存成功，不对普通用户展示",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员创建公告草稿”，检查响应、持久化结果和权限边界满足：保存成功，不对普通用户展示。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-02",
+      "title": "管理员发布公告",
+      "acceptance": "状态变为已发布，前端可查看",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员发布公告”，检查响应、持久化结果和权限边界满足：状态变为已发布，前端可查看。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-03",
+      "title": "普通用户查询公告",
+      "acceptance": "返回有效期内已发布公告",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户查询公告”，检查响应、持久化结果和权限边界满足：返回有效期内已发布公告。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-04",
+      "title": "管理员修改公告",
+      "acceptance": "草稿或撤回状态可编辑，已发布公告先撤回；修改/发布/撤回携带 expected_version，过期版本返回 409",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员修改公告”，检查响应、持久化结果和权限边界满足：草稿或撤回状态可编辑，已发布公告先撤回；修改/发布/撤回携带 expected_version，过期版本返回 409。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-05",
+      "title": "管理员撤回公告",
+      "acceptance": "公共列表不再展示",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员撤回公告”，检查响应、持久化结果和权限边界满足：公共列表不再展示。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-06",
+      "title": "普通用户尝试发布公告",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户尝试发布公告”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-07",
+      "title": "公告超过有效期",
+      "acceptance": "公共列表自动隐藏",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“公告超过有效期”，检查响应、持久化结果和权限边界满足：公共列表自动隐藏。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-08",
+      "title": "用户登录、预约、审批等关键操作",
+      "acceptance": "生成对应操作日志",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户登录、预约、审批等关键操作”，检查响应、持久化结果和权限边界满足：生成对应操作日志。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-09",
+      "title": "管理员按照用户、模块、时间查询日志",
+      "acceptance": "正确返回符合条件的记录",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“管理员按照用户、模块、时间查询日志”，检查响应、持久化结果和权限边界满足：正确返回符合条件的记录。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-10",
+      "title": "普通用户访问全站操作日志",
+      "acceptance": "返回 403",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户访问全站操作日志”，检查响应、持久化结果和权限边界满足：返回 403。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-11",
+      "title": "普通用户尝试修改审计日志",
+      "acceptance": "操作被拒绝",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“普通用户尝试修改审计日志”，检查响应、持久化结果和权限边界满足：操作被拒绝。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-12",
+      "title": "检查日志中的敏感信息",
+      "acceptance": "不包含明文密码或认证令牌",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“检查日志中的敏感信息”，检查响应、持久化结果和权限边界满足：不包含明文密码或认证令牌。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-13",
+      "title": "可信模块提交通知",
+      "acceptance": "同一事务创建通知、收件人和接收审计，返回 201",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“可信模块提交通知”，检查响应、持久化结果和权限边界满足：同一事务创建通知、收件人和接收审计，返回 201。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-14",
+      "title": "同一事件重复/并发提交",
+      "acceptance": "同一来源、事件和通知类型只创建一次，重试返回相同 ID；同键不同内容返回 409",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“同一事件重复/并发提交”，检查响应、持久化结果和权限边界满足：同一来源、事件和通知类型只创建一次，重试返回相同 ID；同键不同内容返回 409。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-15",
+      "title": "用户读取和标记本人消息",
+      "acceptance": "成功；重复标记保留首次 read_at；访问他人消息返回 404",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户读取和标记本人消息”，检查响应、持久化结果和权限边界满足：成功；重复标记保留首次 read_at；访问他人消息返回 404。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-16",
+      "title": "通知失效或到期",
+      "acceptance": "历史可查，有效未读数不包含该消息；只有来源模块可以失效",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“通知失效或到期”，检查响应、持久化结果和权限边界满足：历史可查，有效未读数不包含该消息；只有来源模块可以失效。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-17",
+      "title": "用户令牌冒充服务或模块互相冒充",
+      "acceptance": "返回 401/403，不写入业务记录",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“用户令牌冒充服务或模块互相冒充”，检查响应、持久化结果和权限边界满足：返回 401/403，不写入业务记录。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-18",
+      "title": "邮件/微信发送尚未接入",
+      "acceptance": "返回 422 CHANNEL_NOT_AVAILABLE，不承诺已发送",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“邮件/微信发送尚未接入”，检查响应、持久化结果和权限边界满足：返回 422 CHANNEL_NOT_AVAILABLE，不承诺已发送。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-19",
+      "title": "业务写入时审计失败",
+      "acceptance": "通知/收件人或公告变更整体回滚，重试可成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“业务写入时审计失败”，检查响应、持久化结果和权限边界满足：通知/收件人或公告变更整体回滚，重试可成功。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-20",
+      "title": "D1 或数据库不可用",
+      "acceptance": "返回 503，不泄露连接配置或内部错误；审计写入失败仅输出请求标识和错误码",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“D1 或数据库不可用”，检查响应、持久化结果和权限边界满足：返回 503，不泄露连接配置或内部错误；审计写入失败仅输出请求标识和错误码。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-21",
+      "title": "重建 D3 数据库连接",
+      "acceptance": "MySQL 模式数据、已读状态和幂等键保留；Mock 模式重启清空",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“重建 D3 数据库连接”，检查响应、持久化结果和权限边界满足：MySQL 模式数据、已读状态和幂等键保留；Mock 模式重启清空。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-22",
+      "title": "本机持久化开发模式",
+      "acceptance": "独立配置连接 campus_d3_local；HTTP 业务写入可通过独立 SQL 连接读回，重启 D3 后原记录及首次已读时间保留",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“本机持久化开发模式”，检查响应、持久化结果和权限边界满足：独立配置连接 campus_d3_local；HTTP 业务写入可通过独立 SQL 连接读回，重启 D3 后原记录及首次已读时间保留。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-23",
+      "title": "本机模拟身份与团队环境隔离",
+      "acceptance": "本地入口拒绝远程地址、团队库名或生产环境；团队环境使用正式入口及真实 D1，业务处理逻辑复用",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“本机模拟身份与团队环境隔离”，检查响应、持久化结果和权限边界满足：本地入口拒绝远程地址、团队库名或生产环境；团队环境使用正式入口及真实 D1，业务处理逻辑复用。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-24",
+      "title": "本地浏览器手动验收",
+      "acceptance": "dev:local 页面可发送/重试/失效通知，切换学生查看和标记消息，创建/编辑/发布/撤回公告，筛选审计；操作走既有 HTTP 接口，真实写入本地库，独立 SQL 计数可见",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“本地浏览器手动验收”，检查响应、持久化结果和权限边界满足：dev:local 页面可发送/重试/失效通知，切换学生查看和标记消息，创建/编辑/发布/撤回公告，筛选审计；操作走既有 HTTP 接口，真实写入本地库，独立 SQL 计数可见。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-25",
+      "title": "本地验收工具访问边界",
+      "acceptance": "仅本机专用库入口挂载；非本机 Host、跨站来源及缺失页面会话键的操作被拒绝；页面不包含数据库密码或服务令牌；正式入口不提供验收工具",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“本地验收工具访问边界”，检查响应、持久化结果和权限边界满足：仅本机专用库入口挂载；非本机 Host、跨站来源及缺失页面会话键的操作被拒绝；页面不包含数据库密码或服务令牌；正式入口不提供验收工具。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D3-26",
+      "title": "迁移跨平台换行兼容",
+      "acceptance": "仅 LF/CRLF 换行变化不触发迁移重放；兼容旧 CRLF 校验值且不重写历史记录；实际 SQL 内容变化仍被拒绝",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "在隔离环境执行“迁移跨平台换行兼容”，检查响应、持久化结果和权限边界满足：仅 LF/CRLF 换行变化不触发迁移重放；兼容旧 CRLF 校验值且不重写历史记录；实际 SQL 内容变化仍被拒绝。关联文件为核查入口，不代表该条已存在完整自动断言。",
+      "status": "pending_acceptance",
+      "gap": "需要逐条核对现有断言并补足负例；整套测试成功不自动等于本条验收通过。"
+    },
+    {
+      "id": "D1-RBAC",
+      "title": "动态角色权限",
+      "acceptance": "新角色授予后原 JWT 下一次请求生效，撤销后返回403；最后管理员不能被撤销",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "D1-RECORDS",
+      "title": "个人记录聚合",
+      "acceptance": "只返回本人 M1/M2/M3 记录，分页正确，依赖失败明确报错",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M1-DISPLAY",
+      "title": "每日教室签到码",
+      "acceptance": "同日同教室码稳定、不同教室不同，北京时间零点换码；失联或撤权隐藏旧码",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M1-LIMIT",
+      "title": "预约整点和可配置时长",
+      "acceptance": "非整点、结束不晚于开始、超过配置时长均拒绝；恰好上限允许",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M1-REMIND",
+      "title": "提醒与未签到违约",
+      "acceptance": "T-15及T+10产生站内提醒；T+15未签到记录违约并释放D2占用",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M1-STATS",
+      "title": "运营统计",
+      "acceptance": "授权管理员按日期和教室获取实际预约统计；无权限用户拒绝；零值与缺失区分",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M1-SOCKET",
+      "title": "插座筛选",
+      "acceptance": "固定插座和导轨插座筛选只返回对应座位，非法枚举拒绝",
+      "source": "docs/requirements/demands.md",
+      "owner": "M1",
+      "implementation": [
+        "backend/M1/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "frontend/tests/m1.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M3-PRIORITY",
+      "title": "维修优先级",
+      "acceptance": "类型默认优先级写入工单，高优先级优先展示待派单队列，超时按规则升级",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M3-PUBLIC-REVIEW",
+      "title": "公开维修评价",
+      "acceptance": "已完成工单的评价可由其他登录用户查询，不能越权修改",
+      "source": "docs/requirements/demands.md",
+      "owner": "M3",
+      "implementation": [
+        "backend/M3/src/index.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs",
+        "backend/M3/test/validation.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "D1-LOGOUT",
+      "title": "退出登录",
+      "acceptance": "退出清除本地登录状态，后续受保护请求不使用旧凭据",
+      "source": "docs/requirements/demands.md",
+      "owner": "D1",
+      "implementation": [
+        "backend/D1/src/routes/auth.js",
+        "backend/D1/src/routes/users.js",
+        "backend/D1/src/routes/rbac.js",
+        "backend/D1/src/routes/integration.js"
+      ],
+      "verification": [
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "pending_acceptance",
+      "gap": "待逐条验收；原历史未完成项保留，完成后记录证据而非删除。"
+    },
+    {
+      "id": "M2-AUDIT-RETRY",
+      "title": "审计持久化重试",
+      "acceptance": "D3不可用时事件持久化；M2重启后恢复投递且无重复审计",
+      "source": "docs/requirements/demands.md",
+      "owner": "M2",
+      "implementation": [
+        "backend/M2/src/services/applications.js",
+        "backend/M2/src/routes/m2.js"
+      ],
+      "verification": [
+        "backend/M2/tests/m2.test.mjs",
+        "scripts/integration.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "deferred",
+      "gap": "尚未实现：M2 当前仅记录审计调用失败；外部通知当前明确不支持。需后续实现和真实故障恢复/渠道送达测试。"
+    },
+    {
+      "id": "CHANNEL-EXTERNAL",
+      "title": "邮件与微信实际发送",
+      "acceptance": "接入真实渠道后可验证收件人收到消息和失败重试；未接入时明确拒绝，不返回发送成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "D3",
+      "implementation": [
+        "backend/D3/src/service.js",
+        "backend/D3/src/stores/mysql.js"
+      ],
+      "verification": [
+        "backend/D3/test/api.test.js",
+        "backend/D3/test/persistence.test.js",
+        "backend/D3/test/acceptance.test.js",
+        "backend/D3/test/migration.test.js"
+      ],
+      "command": "npm run test:all",
+      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
+      "status": "deferred",
+      "gap": "尚未实现：M2 当前仅记录审计调用失败；外部通知当前明确不支持。需后续实现和真实故障恢复/渠道送达测试。"
+    },
+    {
+      "id": "QUALITY-TRACE",
+      "title": "需求基线追踪",
+      "acceptance": "所有编号需求登记；验收、实现入口、验证方式、责任模块和状态非空；未完成项有下一步，历史编号不可删除",
+      "source": "docs/requirements/demands.md",
+      "owner": "全组",
+      "implementation": [
+        "scripts/requirements-check.mjs"
+      ],
+      "verification": [
+        "scripts/requirements-check.test.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "所有编号需求登记；验收、实现入口、验证方式、责任模块和状态非空；未完成项有下一步，历史编号不可删除",
+      "status": "verified",
+      "gap": "本轮工程机制已验证；范围与限制见证据记录，不代表所有业务需求完成。",
+      "evidence": "docs/quality-validation.md"
+    },
+    {
+      "id": "QUALITY-TEST",
+      "title": "测试行为有效性",
+      "acceptance": "原版测试通过；五个真实逻辑变异均被行为断言捕获；超时、语法/导入错误不计成功",
+      "source": "docs/requirements/demands.md",
+      "owner": "全组",
+      "implementation": [
+        "scripts/mutation.mjs"
+      ],
+      "verification": [
+        "scripts/mutation.mjs"
+      ],
+      "command": "npm run test:all",
+      "method": "原版测试通过；五个真实逻辑变异均被行为断言捕获；超时、语法/导入错误不计成功",
+      "status": "verified",
+      "gap": "本轮工程机制已验证；范围与限制见证据记录，不代表所有业务需求完成。",
+      "evidence": "docs/quality-validation.md"
+    },
+    {
+      "id": "INFRA-SCRIPT",
+      "title": "基础设施脚本化",
+      "acceptance": "一条命令构建并启动MySQL、六服务及前端；健康后成功；完整CI隔离且结束清理",
+      "source": "docs/requirements/demands.md",
+      "owner": "全组",
+      "implementation": [
+        "start.sh",
+        "docker-compose.yml",
+        "db/init/00-init-databases.sh",
+        "scripts/infra.sh"
+      ],
+      "verification": [
+        "scripts/ci.sh"
+      ],
+      "command": "npm run test:all",
+      "method": "一条命令构建并启动MySQL、六服务及前端；健康后成功；完整CI隔离且结束清理",
+      "status": "verified",
+      "gap": "本轮工程机制已验证；范围与限制见证据记录，不代表所有业务需求完成。",
+      "evidence": "docs/quality-validation.md"
+    },
+    {
+      "id": "INFRA-PRODUCTION",
+      "title": "生产发布与回滚",
+      "acceptance": "批准版本可追溯部署；失败停止发布；上一版本和数据库兼容回滚流程经过演练",
+      "source": "docs/requirements/demands.md",
+      "owner": "全组",
+      "implementation": [
+        "start.sh",
+        "scripts/package.mjs"
+      ],
+      "verification": [
+        "docs/quality-baseline.md"
+      ],
+      "command": "npm run test:all",
+      "method": "批准版本可追溯部署；失败停止发布；上一版本和数据库兼容回滚流程经过演练",
+      "status": "deferred",
+      "gap": "生产审批、目标服务器和回滚演练未配置；本轮不冒充完成生产流水线。"
+    },
+    {
+      "id": "DB-EVOLUTION",
+      "title": "数据库迁移与种子",
+      "acceptance": "空库可重放，已执行版本跳过，种子重复执行无错误；历史校验通过",
+      "source": "docs/requirements/demands.md",
+      "owner": "全组",
+      "implementation": [
+        "scripts/db-replay.sh",
+        "backend/D1/seed.mjs"
+      ],
+      "verification": [
+        "scripts/ci.sh"
+      ],
+      "command": "npm run test:all",
+      "method": "空库可重放，已执行版本跳过，种子重复执行无错误；历史校验通过",
+      "status": "verified",
+      "gap": "本轮工程机制已验证；范围与限制见证据记录，不代表所有业务需求完成。",
+      "evidence": "docs/quality-validation.md"
+    }
+  ]
+}

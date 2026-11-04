@@ -28,7 +28,7 @@ function copy(source, destination) {
 }
 try {
   // Deliberately package only runtime sources and their deployment helpers.
-  for (const entry of ['frontend','backend','db','scripts','docker-compose.yml','.env.example','package.json','package-lock.json','start.sh','README.md']) {
+  for (const entry of ['frontend','backend','db','docs','scripts','docker-compose.yml','.env.example','package.json','package-lock.json','start.sh','README.md']) {
     copy(path.join(root, entry), path.join(stage, entry));
   }
   fs.writeFileSync(path.join(stage, 'release.json'), JSON.stringify({ revision, packagedAt: new Date().toISOString(), type: 'source-compose', note: 'Current working tree; tests must pass before packaging in CI.' }, null, 2));

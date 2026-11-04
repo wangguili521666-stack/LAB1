@@ -297,3 +297,7 @@ npm run build
 ## 数据库版本演进与部署隔离
 
 迁移、种子数据及集成测试使用约定见 [docs/database-evolution.md](docs/database-evolution.md)。已有环境重放执行 `npm run db:replay`，正式集成验收执行 `npm run test:all`。
+
+## 需求追踪与行为验证
+
+见 [质量基线说明](docs/quality-baseline.md)。`npm run requirements:check` 检查需求完整性；`npm run test:mutation` 验证故意破坏逻辑后测试会失败；两项已接入 CI。基础设施统一使用 `npm run infra:up`、`npm run infra:status`、`npm run infra:stop`。

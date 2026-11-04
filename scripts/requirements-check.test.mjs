@@ -1,0 +1,11 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {validate} from './requirements-check.mjs';
+const entry={id:'M1-01',title:'查询',acceptance:'仅返回可用座位',source:'demands.md',owner:'M1',command:'npm test',method:'查询并断言结果',gap:'待验收',status:'pending_acceptance',implementation:['app.js'],verification:['test.js']};
+const check=(rows,source='M1-01\t查询\t仅返回可用座位')=>validate({requirements:rows},['M1-01'],source,p=>['demands.md','app.js','test.js'].includes(p));
+test('完整的待验收项保留且通过结构检查',()=>assert.deepEqual(check([entry]),[]));
+test('删除历史需求被发现',()=>assert.ok(check([]).some(x=>x.includes('不能删除'))));
+test('缺少验收标准被发现',()=>assert.ok(check([{...entry,acceptance:''}]).some(x=>x.includes('缺少 acceptance'))));
+test('未登记新需求被发现',()=>assert.ok(check([entry],'M1-01\t查询\t仅返回可用座位\nM1-02\t预约\t生成记录').some(x=>x.includes('未登记'))));
+test('假实现路径与无证据完成状态被发现',()=>{assert.ok(check([{...entry,implementation:['missing.js']}]).length);assert.ok(check([{...entry,status:'verified'}]).some(x=>x.includes('证据')));});
+test('验收标准变更不同步被发现',()=>assert.ok(check([entry],'M1-01\t查询\t返回全部座位').some(x=>x.includes('不同步'))));
