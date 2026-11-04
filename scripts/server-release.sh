@@ -59,7 +59,11 @@ PY
   docker load -i "$next/images.tar"
 else echo '用法: server-release.sh deploy 包 | rollback 版本 | status'; exit 2; fi
 compose "$next" config --quiet
-if ! compose "$next" up -d --no-build --pull never --wait --wait-timeout 600; then
+healthy=true
+for service in mysql d1 d2 d3 m1 m2 m3 frontend; do
+  if ! compose "$next" up -d --no-deps --no-build --pull never --wait --wait-timeout 600 "$service"; then healthy=false; break; fi
+done
+if [[ "$healthy" != true ]]; then
   echo '发布失败；未更新当前成功版本。请检查容器和迁移状态。' >&2
   exit 1
 fi
