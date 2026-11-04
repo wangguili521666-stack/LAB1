@@ -5,7 +5,11 @@
   "scripts": {
     "start": "node src/index.js",
     "test": "node --test",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "premigrate": "node migration-check.mjs",
+    "postmigrate": "npm run seed",
+    "seed": "node seed.mjs",
+    "migration:register": "node migration-check.mjs --register"
   },
   "dependencies": {
     "express": "^4.21.2",

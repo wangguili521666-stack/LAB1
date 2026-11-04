@@ -20,6 +20,8 @@ async function main() {
   })
 
   try {
+    const [[lock]] = await conn.query("SELECT GET_LOCK(?, 30) AS acquired", [config.db.database + "_migration"]);
+    if (Number(lock.acquired) !== 1) throw Error("无法获得迁移锁");
     await conn.query(
       `CREATE TABLE IF NOT EXISTS schema_migrations (
         filename VARCHAR(255) NOT NULL PRIMARY KEY,

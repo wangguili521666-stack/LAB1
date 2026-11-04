@@ -1,0 +1,6 @@
+{
+  "001_resources.sql": "bcff56f62b36f7911db944c3bbca4e62b2b9ba3a1c385e8fcbc8bdc40afd7629",
+  "002_audit_outbox.sql": "39e4b975a252a2de3dbde80d90eeadaccfb576bb5e54473ba0a4eaf47f836546",
+  "003_reservations.sql": "fd770b96686292d70dbe4329d5d012ad65ea5780ec52ea1b69a1537c5520ec61",
+  "004_maintenance.sql": "8af8f9867ae10da0671a2cb9822c273397a15ffc9a9ee23a64253cf8034fd565"
+}

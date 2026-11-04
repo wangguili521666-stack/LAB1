@@ -61,3 +61,7 @@ mysql://m1_app:<password>@mysql:3306/campus_m1?charset=utf8mb4
 2. **root 不给业务用**。每个服务只用自己模块的 `*_app` 账号。
 3. **密码不提交仓库**。真实密码只放 `.env`（已被 .gitignore 忽略），`.env.example` 只放占位值。
 4. 收紧安全：把 `db/init` 里账号的 `'%'` 改为具体主机/网段；生产环境再把账号拆成 `*_migrate`（DDL）与 `*_app`（DML）两个。
+
+## 数据库版本演进与部署隔离
+
+迁移、种子数据及集成测试使用约定见 [数据库演进说明](../docs/database-evolution.md)。已有环境重放执行 `npm run db:replay`，正式集成验收执行 `npm run test:all`。

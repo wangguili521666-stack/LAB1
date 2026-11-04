@@ -1,0 +1,5 @@
+{
+  "001_init.sql": "432acabec7ca9ccd8aae3432eed65609e3ff7e6cff521ef4b2e32e54b589f813",
+  "002_seed_roles.sql": "3e6815a5f703f36378021a3d81133c2087003abc1670ab2ef932620580ef0589",
+  "003_rbac.sql": "e565d717f95fe257dcfcf65ae41ec2b0d699b2c0dc1d30d7e1850ac2c3d87d42"
+}

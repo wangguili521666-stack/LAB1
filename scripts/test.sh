@@ -18,6 +18,6 @@ printf 'mode=%s\nexit_code=%s\n' "$MODE" "$status" > "$REPORT_DIR/status.txt"
 if [[ "$status" == 0 ]]; then
   echo "测试入口执行成功（${MODE}）；请查看日志中的跳过项。"
 else
-  echo "测试失败，退出码 $status。日志: $REPORT" >&2
+  echo "测试失败，退出码 ${status}。日志: $REPORT" >&2
 fi
 exit "$status"

@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "D3 通知、个人消息、公告与操作审计",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
@@ -17,7 +19,11 @@
     "migrate": "node scripts/migrate.js",
     "test": "node --test test/*.test.js",
     "test:mysql:local": "node scripts/test-mysql-local.js",
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.js",
+    "premigrate": "node migration-check.mjs",
+    "postmigrate": "npm run seed",
+    "seed": "node seed.mjs",
+    "migration:register": "node migration-check.mjs --register"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

@@ -8,7 +8,11 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "migrate": "node scripts/migrate.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "premigrate": "node migration-check.mjs",
+    "postmigrate": "npm run seed",
+    "seed": "node seed.mjs",
+    "migration:register": "node migration-check.mjs --register"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

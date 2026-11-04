@@ -74,7 +74,7 @@ compose=compose.replace('${MYSQL_PORT:-3306}:3306','127.0.0.1::3306');
 for (const service of ['frontend','d1','d2','d3','m1','m2','m3']) {
   const marker = `  ${service}:\n`;
   if (!compose.includes(marker)) throw Error(`Missing Compose service: ${service}`);
-  compose = compose.replace(marker, `${marker}    image: ${process.env.COMPOSE_PROJECT_NAME}-${service}:latest\n`);
+  compose = compose.replace(new RegExp(`^  ${service}:\\n`, 'm'), `${marker}    image: ${process.env.COMPOSE_PROJECT_NAME}-${service}:latest\n`);
 }
 fs.writeFileSync('docker-compose.yml',compose);
 JS
@@ -100,6 +100,13 @@ build_started=1
 DOCKER_BUILDKIT=1 docker compose build
 started=1
 docker compose up -d --no-build --wait --wait-timeout 240
+# Fresh isolated database has already replayed every migration during startup.
+# Replay twice to verify history skipping and seed idempotency before API tests.
+for replay in 1 2; do
+  for service in d1 d2 d3 m1 m2 m3; do
+    docker compose exec -T "$service" npm run migrate
+  done
+done
 mysql_port="$(docker compose port mysql 3306 | tail -1)"
 mysql_port="${mysql_port##*:}"
 # Provision a separate M2 test schema inside this disposable MySQL container.

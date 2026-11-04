@@ -12,6 +12,7 @@
     "test:all": "bash scripts/test.sh full",
     "ci": "bash scripts/test.sh full",
     "package": "node scripts/package.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "db:replay": "bash scripts/db-replay.sh"
   }
 }

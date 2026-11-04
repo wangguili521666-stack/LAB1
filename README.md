@@ -293,3 +293,7 @@ npm run build
 ```
 
 缺少 Vite 时自动执行前端 `npm ci`，首次安装需要联网。已有依赖发生变化时，先执行 `npm --prefix frontend ci`。构建产物输出到 `frontend/dist/`。后端是直接运行的 JavaScript，无需编译；该命令不启动服务或数据库，完整平台仍通过 `./start.sh` 启动。
+
+## 数据库版本演进与部署隔离
+
+迁移、种子数据及集成测试使用约定见 [docs/database-evolution.md](docs/database-evolution.md)。已有环境重放执行 `npm run db:replay`，正式集成验收执行 `npm run test:all`。
