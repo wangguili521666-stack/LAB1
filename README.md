@@ -301,3 +301,7 @@ npm run build
 ## 需求追踪与行为验证
 
 见 [质量基线说明](docs/quality-baseline.md)。`npm run requirements:check` 检查需求完整性；`npm run test:mutation` 验证故意破坏逻辑后测试会失败；两项已接入 CI。基础设施统一使用 `npm run infra:up`、`npm run infra:status`、`npm run infra:stop`。
+
+## GitHub CI/CD
+
+当前交付使用GitHub Actions，使用及审批/回滚说明见 [GitHub交付说明](docs/github-cicd.md)。历史CodeArts文档保留供追溯。
