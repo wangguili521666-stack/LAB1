@@ -56,7 +56,9 @@ PY
   # Non-secret init scripts must be readable by the MySQL container user.
   chmod 755 "$next/db" "$next/db/init"
   find "$next/db/init" -type f -exec chmod 644 {} +
-  docker load -i "$next/images.tar"
+  images=(mysql:8.0)
+  for service in d1 d2 d3 m1 m2 m3 frontend; do images+=("lab1-$service:$target"); done
+  docker image inspect "${images[@]}" >/dev/null 2>&1 || docker load -i "$next/images.tar"
 else echo '用法: server-release.sh deploy 包 | rollback 版本 | status'; exit 2; fi
 compose "$next" config --quiet
 healthy=true
