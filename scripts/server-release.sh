@@ -53,6 +53,9 @@ os.chmod(sys.argv[2],0o600)
 PY
   fi
   ln -sfn "$ROOT/shared/.env" "$next/.env"
+  # Non-secret init scripts must be readable by the MySQL container user.
+  chmod 755 "$next/db" "$next/db/init"
+  find "$next/db/init" -type f -exec chmod 644 {} +
   docker load -i "$next/images.tar"
 else echo '用法: server-release.sh deploy 包 | rollback 版本 | status'; exit 2; fi
 compose "$next" config --quiet
