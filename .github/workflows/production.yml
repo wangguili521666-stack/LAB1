@@ -1,0 +1,61 @@
+name: Production
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        options: [deploy, rollback]
+        default: deploy
+        required: true
+      run_id:
+        description: 'Successful CI run ID (deploy only)'
+        type: string
+      rollback_version:
+        description: 'Full retained release ID (rollback only)'
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the successful staging artifact
+        if: inputs.action == 'deploy'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/run.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/run.json'))
+          assert r['conclusion']=='success' and r['head_branch']=='main' and r['path']=='.github/workflows/ci.yml' and r['event'] in ['push','workflow_dispatch'], 'Must select a successful main CI deployment'
+          PY
+          attempt=$(python3 -c 'import json; print(json.load(open("/tmp/run.json"))["run_attempt"])')
+          gh run download "$RUN_ID" --name "release-$RUN_ID-$attempt" --dir artifacts
+      - name: Deploy or roll back after environment approval
+        env:
+          ACTION: ${{ inputs.action }}
+          ROLLBACK_VERSION: ${{ inputs.rollback_version }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          if [[ "$ACTION" == rollback ]]; then
+            bash scripts/remote-release.sh rollback "$ROLLBACK_VERSION"
+          else
+            bundles=(artifacts/release-*.tar.gz)
+            test "${#bundles[@]}" = 1
+            bash scripts/remote-release.sh deploy "${bundles[0]}"
+          fi
