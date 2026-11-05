@@ -2,6 +2,30 @@
 
 六个模块协作的校园资源服务平台。本仓库面向「人 + AI 编程助手」并行开发：**所有开发规则统一写在 [`agents.md`](./agents.md)**，本文是项目架构与开发入口，帮团队成员快速上手，并能正确地用 Agent 开发。
 
+## 先从这里开始
+
+- **使用系统**：本地执行 `bash start.sh`，打开脚本输出的 `/login` 地址，自行注册账号；详细步骤见[运行与使用手册](docs/operation-guide.md)。
+- **了解本次交付**：见下方功能表，以及[运行与使用手册](docs/operation-guide.md)中的实现文件对应关系。
+- **开发和测试**：Node.js 22+，`npm test` 做快速检查，`npm run test:all` 做隔离的真实数据库和跨模块验收；见[测试说明](docs/testing.md)。
+- **合并和发布**：PR 测试通过并获批准 → 合并 main → 自动部署测试环境；生产另需手动发起并审批。见[GitHub CI/CD 手册](docs/github-cicd.md)。
+- **查验完成情况**：见[交付验收记录](docs/github-cicd-validation.md)和[逐条需求追踪](docs/requirements/traceability.md)，不能把整轮 CI 通过等同于所有业务需求已验收。
+
+### 已交付的工程能力
+
+| 能力 | 如何实现 | 如何使用或验证 |
+| --- | --- | --- |
+| Schema 版本演进 | 各模块 migrations、历史 SQL 校验清单、数据库迁移记录，成功版本跳过 | `npm run db:replay`；完整 CI 从空库启动并重放两轮 |
+| 幂等初始化数据 | seeds 与业务数据分开，迁移后自动执行，保留已有自定义配置 | [数据库演进手册](docs/database-evolution.md) |
+| 需求可追踪 | 稳定编号、验收条件、实现/验证路径、状态及缺口 | `npm run requirements:check` |
+| 测试有效性 | 临时副本故意破坏真实逻辑，要求原测试失败 | `npm run test:mutation`；[质量基线](docs/quality-baseline.md) |
+| 基础设施脚本化 | Docker Compose、随机本地配置、一键启动与健康检查 | `bash start.sh`；`npm run infra:status` |
+| 避免部署干扰验收 | 每轮完整 CI 使用独立目录、端口、数据库卷；部署按环境串行 | `npm run test:all`，不用正在部署的共享环境判定 CI |
+| 自动构建与测试部署 | GitHub push/PR 触发 quality，main 成功后统一打包七个应用并部署 | GitHub Actions → CI |
+| 合并与生产门禁 | main 必需检查和代码评审，production 人工审批，同一制品晋级 | [审批及发布步骤](docs/github-cicd.md) |
+| 版本追踪及兼容回滚 | `/version.json`、发布日志、保留制品、Schema 指纹校验 | 生产工作流 rollback；实际验收限制见[记录](docs/github-cicd-validation.md) |
+
+生产首版已发布，测试环境已做双向回滚演练。回滚保留新版发布器的修复在 PR #3，尚待合并；生产首版没有旧成功版本，生产实际回滚仍待验收。这是交付记录，不是自动更新的在线状态面板。
+
 ## 一、模块划分
 
 下表说明模块职责分工；实际实现与启动方式见后文。
@@ -131,7 +155,7 @@ npm run dev
 
 启动脚本会尝试打开 Docker Desktop，首次运行生成缺失的本地配置和随机密钥，
 然后构建并启动 **MySQL → D1/D2/D3/M1/M2/M3 六个后端 → 前端**。
-数据库健康后，D1 自动执行现有版本化迁移；已执行的迁移会跳过。
+数据库健康后，六个后端分别执行本模块版本化迁移和种子脚本；已成功执行的迁移会跳过。
 脚本保留已有 `.env`、数据库账号密码和数据卷，不清库或重置密码。
 本机无需安装 Node.js、npm；首次生成配置需要 openssl（macOS 已提供）。
 
@@ -194,9 +218,8 @@ docker compose run --rm --no-deps frontend node --test tests/auth.test.mjs
 - 前端默认仅监听本机 5173；端口冲突时在 `.env` 设置 `FRONTEND_PORT=5174`。
 - `/api/d1` 通过 Compose 网络连接 `d1:3004`，D1 只使用 `d1_app` 账号连接 `campus_d1`。
 - `/api/m2` 连接 `m2:3002`，M2 只使用 `m2_app` 账号连接 `campus_m2`，并用 `D1_JWT_SECRET` 校验登录态。
-- D1 和 M2 都不发布宿主机端口，浏览器统一通过前端访问接口。
-- 其他 `/api` 不再默认转发到宿主机 8080，以免误连其他项目。
-  后续网关就绪后，在 `.env` 配置 `API_TARGET=http://实际网关地址:端口`。
+- 六个后端均通过 Compose 内网访问，浏览器统一通过前端的 `/api/d1`、`/api/d2`、`/api/d3`、`/api/m1`、`/api/m2`、`/api/m3` 代理调用；本地开发不要把这些路径改指向生产。
+- 未匹配上述模块的 `/api` 才使用 `API_TARGET` 回退配置。
 - MySQL 端口仍由 `.env` 的 `MYSQL_PORT` 控制；数据保存在原 `mysql_data` 卷中。
 - 已有数据卷不会重新执行首次初始化脚本。若账号密码不一致，应检查原配置和数据库授权，
   不要通过删除数据卷解决；修改 `.env` 并不会自动修改库内已有密码。
