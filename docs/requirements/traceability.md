@@ -109,5 +109,5 @@
 |QUALITY-TRACE|需求基线追踪|verified|scripts/requirements-check.mjs|scripts/requirements-check.test.mjs|
 |QUALITY-TEST|测试行为有效性|verified|scripts/mutation.mjs|scripts/mutation.mjs|
 |INFRA-SCRIPT|基础设施脚本化|verified|start.sh, docker-compose.yml, db/init/00-init-databases.sh, scripts/infra.sh|scripts/ci.sh|
-|INFRA-PRODUCTION|生产发布与回滚|deferred|start.sh, scripts/package.mjs|docs/quality-baseline.md|
+|INFRA-PRODUCTION|生产发布与回滚|partial|.github/workflows/ci.yml, .github/workflows/production.yml, scripts/server-release.sh|scripts/release_test.py, docs/github-cicd-validation.md|
 |DB-EVOLUTION|数据库迁移与种子|verified|scripts/db-replay.sh, backend/D1/seed.mjs|scripts/ci.sh|

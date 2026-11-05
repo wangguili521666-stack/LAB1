@@ -72,7 +72,9 @@ fi
 # Only advance the pointer after all seven application services and MySQL are healthy.
 [[ -z "$current" || ! -f "$current/release.json" ]] || ln -sfn "$current" "$ROOT/previous"
 ln -sfn "$next" "$ROOT/current"
-install -m 700 "$next/server-release.sh" "$ROOT/server-release.sh"
+if [[ "$mode" == deploy ]]; then
+  install -m 700 "$next/server-release.sh" "$ROOT/server-release.sh"
+fi
 python3 - "$next/release.json" "$mode" >> "$ROOT/deployments.jsonl" <<'PY'
 import sys,json,datetime
 x=json.load(open(sys.argv[1]));x.update(action=sys.argv[2],deployedAt=datetime.datetime.now(datetime.timezone.utc).isoformat());print(json.dumps(x))

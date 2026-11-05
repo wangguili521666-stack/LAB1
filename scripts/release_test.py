@@ -25,4 +25,10 @@ class Releases(unittest.TestCase):
   a=self.release('a');b=self.release('b');(self.root/'current').symlink_to(a)
   result=self.run_script('rollback',b.name);self.assertEqual(result.returncode,0,result.stderr);self.assertEqual((self.root/'current').resolve(),b);self.assertEqual((self.root/'previous').resolve(),a)
   record=json.loads((self.root/'deployments.jsonl').read_text());self.assertEqual(record['action'],'rollback');self.assertEqual(record['release'],b.name)
+ def test_rollback_preserves_current_release_controller(self):
+  a=self.release('a');b=self.release('b');(self.root/'current').symlink_to(a)
+  controller=self.root/'server-release.sh';controller.write_text('new controller')
+  result=self.run_script('rollback',b.name)
+  self.assertEqual(result.returncode,0,result.stderr)
+  self.assertEqual(controller.read_text(),'new controller')
 if __name__=='__main__':unittest.main()

@@ -2066,16 +2066,19 @@
       "source": "docs/requirements/demands.md",
       "owner": "全组",
       "implementation": [
-        "start.sh",
-        "scripts/package.mjs"
+        ".github/workflows/ci.yml",
+        ".github/workflows/production.yml",
+        "scripts/server-release.sh"
       ],
       "verification": [
-        "docs/quality-baseline.md"
+        "scripts/release_test.py",
+        "docs/github-cicd-validation.md"
       ],
-      "command": "npm run test:all",
-      "method": "批准版本可追溯部署；失败停止发布；上一版本和数据库兼容回滚流程经过演练",
-      "status": "deferred",
-      "gap": "生产审批、目标服务器和回滚演练未配置；本轮不冒充完成生产流水线。"
+      "command": "python3 scripts/release_test.py",
+      "method": "运行发布器行为测试；核对成功main CI与人工批准的Production运行、版本接口及健康状态；在批准窗口执行兼容版本回滚并检查结果。",
+      "status": "partial",
+      "gap": "已完成生产首版人工审批发布与测试环境双向回滚；回滚发布器修复PR #3待合并，生产尚无第二个成功版本，生产实际回滚待验收。",
+      "evidence": "docs/github-cicd-validation.md"
     },
     {
       "id": "DB-EVOLUTION",
