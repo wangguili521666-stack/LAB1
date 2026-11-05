@@ -100,3 +100,13 @@ export function formatRecordTime(value) {
     hour12: false,
   }).format(date);
 }
+
+// Fail closed when the authoritative setting is missing or malformed.
+export async function loadBookingLimit(api) {
+  const settings = await api.settings();
+  const entries = Array.isArray(settings) ? settings.filter(x => x.setting_key === 'max_booking_hours') : [];
+  const value = entries.length === 1 ? Number(entries[0].setting_value) : NaN;
+  if (!Number.isInteger(value) || value < 1 || value > 24)
+    throw new Error('预约时长配置无效，请刷新重试或联系管理员');
+  return value;
+}

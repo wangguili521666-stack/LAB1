@@ -52,7 +52,7 @@ function closeDialog(event) {
       </div>
       <div class="m1-rule">
         <AppIcon name="seat" /><span
-          >整点预约<strong>单次最多 4 小时</strong></span
+          >整点预约<strong>{{ state.maxHours === null ? "时长上限以查询时配置为准" : `单次最多 ${state.maxHours} 小时` }}</strong></span
         >
       </div>
     </header>

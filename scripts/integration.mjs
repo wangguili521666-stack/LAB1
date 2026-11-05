@@ -90,6 +90,23 @@ tomorrow.setUTCHours(2, 0, 0, 0);
 const start = tomorrow.toISOString(),
   end = new Date(+tomorrow + 3600000).toISOString();
 const body = { seat_id: seat.id, start_time: start, end_time: end };
+// M1-LIMIT: exercise the real student read and server write boundary.
+await api('/api/m1/settings',null,undefined,'GET',401);
+await api('/api/m1/settings/max_booking_hours',student.token,{setting_value:6},'PUT',403);
+for (const limit of [6,2]) {
+  await api('/api/m1/settings/max_booking_hours',admin.token,{setting_value:limit},'PUT');
+  const settings=await api('/api/m1/settings',student.token);
+  assert.equal(Number(settings.find(x=>x.setting_key==='max_booking_hours').setting_value),limit);
+  const query={...body,end_time:new Date(+tomorrow+limit*3600000).toISOString()};
+  const booking=await api('/api/m1/bookings',student.token,query);
+  assert.equal(booking.status,'BOOKED');
+  await api(`/api/m1/bookings/${booking.id}/cancel`,student.token,{});
+  await api('/api/m1/bookings',student.token,{...query,end_time:new Date(+tomorrow+(limit+1)*3600000).toISOString()},'POST',400);
+}
+await api('/api/m1/settings/max_booking_hours',admin.token,{setting_value:4},'PUT');
+await api('/api/m1/bookings',student.token,{...body,start_time:new Date(+tomorrow+60000).toISOString()},'POST',400);
+await api('/api/m1/bookings',student.token,{...body,end_time:start},'POST',400);
+console.log('PASS M1-LIMIT: student configuration read, admin authorization, limits 6/2, exact boundary and invalid intervals');
 const race = await Promise.all(
   [student, other].map(async (u) => {
     const r = await fetch(base + "/api/m1/bookings", {

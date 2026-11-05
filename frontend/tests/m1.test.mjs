@@ -31,6 +31,7 @@ const deferred = () => {
 };
 function setup(t, overrides = {}) {
   const api = {
+    settings: async () => [{ setting_key: "max_booking_hours", setting_value: "4" }],
     search: async () => [seat],
     book: async () => ({ id: "501" }),
     bookings: async () => ({ items: [] }),
@@ -122,6 +123,7 @@ test("newer search wins over a late older response", async (t) => {
   let calls = 0;
   const m = setup(t, { search: () => (++calls === 1 ? a.promise : b.promise) });
   const first = m.search();
+  await new Promise(resolve => setImmediate(resolve));
   m.filters.building = "B";
   const second = m.search();
   b.resolve([{ ...seat, seat_number: "B01" }]);
@@ -188,6 +190,7 @@ test("duplicate confirmation posts exactly once using selected query snapshot", 
   m.select(seat);
   const first = m.confirmBooking();
   const second = m.confirmBooking();
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(bodies.length, 1);
   assert.equal(await second, false);
   assert.deepEqual(bodies[0], {
@@ -303,4 +306,31 @@ test("cancel preserves existing action, refreshes and prevents duplicate request
   await first;
   assert.match(m.state.success, /已取消/);
   assert.equal(m.state.cancelPending, "");
+});
+
+test('server limit drives search and revalidates confirmation after configuration changes', async t => {
+  let limit=6, writes=0;
+  const m=setup(t,{settings:async()=>[{setting_key:'max_booking_hours',setting_value:String(limit)}],book:async()=>{writes++;return {id:'1'}}});
+  m.filters.end='2026-11-01T14:00';
+  assert.equal(await m.search(),true);
+  assert.equal(m.state.maxHours,6);
+  m.select(seat);limit=2;
+  assert.equal(await m.confirmBooking(),false);
+  assert.equal(writes,0);
+  assert.match(m.state.bookingError,/2 小时/);
+  assert.equal(await m.search(),false);
+  m.filters.end='2026-11-01T11:00';
+  assert.equal(await m.search(),true);
+  m.select(seat);assert.equal(await m.confirmBooking(),true);assert.equal(writes,1);
+});
+test('missing, invalid or unavailable setting blocks search rather than falling back to four hours', async t => {
+  for(const settings of [async()=>[],async()=>[{setting_key:'max_booking_hours',setting_value:'0'}],async()=>{throw Error('配置服务不可用')}]){
+    let calls=0;const m=setup(t,{settings,search:async()=>{calls++;return [seat]}});
+    assert.equal(await m.search(),false);assert.equal(calls,0);assert.equal(m.state.searching,false);assert.equal(m.state.maxHours,null);
+  }
+});
+test('changing filters during configuration fetch does not send a stale query', async t => {
+  const d=deferred();let calls=0;const m=setup(t,{settings:()=>d.promise,search:async()=>{calls++;return [seat]}});
+  const pending=m.search();m.filters.building='changed';d.resolve([{setting_key:'max_booking_hours',setting_value:'6'}]);
+  assert.equal(await pending,false);assert.equal(calls,0);assert.equal(m.state.searching,false);
 });
