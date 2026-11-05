@@ -32,6 +32,10 @@ try{
   v.logging={driver:'json-file',options:{'max-size':'10m','max-file':'3'}};
   if(service!=='mysql'){v.image=`lab1-${service}:${release}`;v.environment={...v.environment,NODE_OPTIONS:'--max-old-space-size=96'};delete v.volumes;}
  }
+ for(const [service,port] of Object.entries({d1:3004,d2:3005,d3:3006,m1:3001,m2:3002,m3:3003})){
+  c.services[service].command=['sh','-c','npm run migrate && exec node src/index.js'];
+  c.services[service].healthcheck={test:['CMD','wget','-q','-O','/dev/null',`http://127.0.0.1:${port}/api/${service}/health`],interval:'30s',timeout:'10s',retries:10,start_period:'90s'};
+ }
  const front=c.services.frontend; front.environment={};front.ports=['${LAB1_BIND:-0.0.0.0}:${LAB1_PORT:-80}:80'];
  front.depends_on=Object.fromEntries(['d1','d2','d3','m1','m2','m3'].map(s=>[s,{condition:'service_healthy'}]));
  front.healthcheck={test:['CMD','wget','-q','-O','/dev/null','http://127.0.0.1/healthz'],interval:'10s',timeout:'5s',retries:6};
