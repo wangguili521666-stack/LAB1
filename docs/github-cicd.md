@@ -8,11 +8,11 @@
 
 main通过后构建六后端与Nginx静态前端镜像，连同数据库镜像、Compose及初始化脚本形成一个发布包。版本为完整Git SHA、Actions run ID和attempt的组合。只允许干净已提交版本打包。staging自动下载同一run的包，校验SHA256后部署所有模块，迁移、种子、全服务健康检查均自动执行。
 
-Production工作流手动选deploy并输入成功CI的run_id；环境要求负责人批准；按负责人明确批准，允许发起人手动审批。只接受main上的成功CI（含测试部署成功）制品，生产不重新构建。选rollback并填rollback_version可退回主机保留的版本，同样经过环境审批。只有Schema指纹相同的版本允许自动回滚；不降级或清空业务库。
+Production工作流手动选deploy并输入成功CI的run_id；环境要求负责人批准；按负责人明确批准，允许发起人手动审批。只接受main上的成功CI（含测试部署成功）制品，生产不重新构建。选rollback并填rollback_version可退回主机保留的版本，同样经过环境审批。应用回滚保留当前发布器，避免恢复旧版启动逻辑；只有正常部署才更新发布器。只有Schema指纹相同的版本允许自动回滚；不降级或清空业务库。
 
 ## 合并与审批
 
-main配置quality必需状态检查、与最新分支同步、至少1次批准、CODEOWNERS评审、过期批准失效、会话解决、管理员同样遵守、禁force push和删除。全仓库由@wangguili521666-stack评审，覆盖跨模块、公共层和Schema。
+main配置quality必需状态检查、与最新分支同步、至少1次批准、CODEOWNERS评审、过期批准失效、会话解决、管理员同样遵守、禁force push和删除。全仓库由@wangguili521666-stack和@Timing04作为CODEOWNERS评审，覆盖跨模块、公共层和Schema。
 
 作者不能批准自己的PR；自己的变更需要另一位有写权限的组员评审。生产仍须人工审批；负责人已明确选择允许自己发起后手动审批，管理员不能绕过审批。仓库仅有一名成员时无法完成独立评审，不应通过关闭门禁冒充完成。
 
@@ -32,6 +32,6 @@ main配置quality必需状态检查、与最新分支同步、至少1次批准�
 
 ## 验证
 
-`python3 scripts/release_test.py`验证缺少版本、非法目标、Schema不兼容、健康失败不更新指针、兼容回滚更新版本与日志。Docker为受控外部边界，实际发布脚本真实执行；真实容器另经CI和主机健康检查。
+`python3 scripts/release_test.py`验证缺少版本、非法目标、Schema不兼容、健康失败不更新指针、兼容回滚更新版本与日志、回滚保留当前发布器。Docker为受控外部边界，实际发布脚本真实执行；真实容器另经CI和主机健康检查。
 
 参考：[GitHub分支保护](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)、[环境审批](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)。
