@@ -126,6 +126,26 @@ execFileSync('docker', ['compose', 'exec', '-T', 'mysql', 'sh', '-c', 'MYSQL_PWD
 JS
 (cd backend/M2; npm test)
 (cd backend/D2; npm run test:integration)
+
+# D3 database tests must run against a dedicated schema and a non-root account.
+export D3_TEST_PASSWORD="$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))")"
+node --input-type=module <<'JS'
+import { execFileSync } from 'node:child_process';
+const password=process.env.D3_TEST_PASSWORD;
+if (!/^[a-f0-9]{48}$/.test(password)) throw Error('Invalid D3 test password');
+const sql=`CREATE DATABASE d3_isolated_test; CREATE USER 'd3_test'@'%' IDENTIFIED BY '${password}'; GRANT ALL ON d3_isolated_test.* TO 'd3_test'@'%';`;
+execFileSync('docker',['compose','exec','-T','mysql','sh','-c','MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root'],{input:sql,stdio:['pipe','inherit','inherit']});
+JS
+export D3_TEST_PORT="$mysql_port"
+D3_TEST_MYSQL="$(node <<'JS'
+console.log(JSON.stringify({host:'127.0.0.1',port:Number(process.env.D3_TEST_PORT),user:'d3_test',password:process.env.D3_TEST_PASSWORD,database:'d3_isolated_test'}));
+JS
+)"
+export D3_TEST_MYSQL
+node -e 'if (!JSON.parse(process.env.D3_TEST_MYSQL).password) throw Error("Missing D3 test credentials")'
+(cd backend/D3; node --test --test-concurrency=1 test/*.test.js)
+unset D3_TEST_MYSQL D3_TEST_PASSWORD D3_TEST_PORT
+
 frontend_port="$(docker compose port frontend 5173 | tail -1)"
 TEST_BASE_URL="http://127.0.0.1:${frontend_port##*:}" node scripts/integration.mjs
 echo 'CI build, tests and Compose integration passed.'

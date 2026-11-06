@@ -52,3 +52,7 @@ npm test
 ## 2026-11-04 新增质量门禁
 
 unit/full均执行107条需求基线完整性检查、6项检查器测试及5项真实实现变异验证。使用及限制见 [质量基线](quality-baseline.md)，本轮结果见 [验收记录](quality-validation.md)。
+
+## D3完整数据库专项
+
+完整模式在本轮临时MySQL实例创建d3_isolated_test及最小范围账号d3_test，以D3_TEST_MYSQL配置串行运行全部D3测试；37项应全通过且零跳过。前面的快速阶段仍可看到13项条件跳过，不能只看快速阶段作最终结论。具体本轮证据见 [验收闭环记录](acceptance-closure-progress.md)。

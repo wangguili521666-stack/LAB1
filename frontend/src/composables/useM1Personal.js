@@ -1,5 +1,5 @@
 import { reactive, onScopeDispose } from "vue";
-import { buildSearch, defaultFilters, statusLabels } from "../utils/m1.js";
+import { buildSearch, defaultFilters, statusLabels, loadBookingLimit } from "../utils/m1.js";
 
 const makeList = () => ({
   items: [],
@@ -195,11 +195,14 @@ export function useM1Personal(api, onResourceChange = async () => {}) {
       }
     }
     if (dialog.kind === "rebook") {
+      state.pending = true;
       try {
+        const maxHours = await loadBookingLimit(api);
+        if (disposed || state.dialog !== dialog) { state.pending = false; return false; }
         const { params } = buildSearch({
           start: dialog.start,
           end: dialog.end,
-        });
+        }, maxHours);
         body = {
           original_booking_id: dialog.id,
           start_time: params.start_time,
@@ -207,6 +210,7 @@ export function useM1Personal(api, onResourceChange = async () => {}) {
         };
       } catch (error) {
         dialog.error = error.message;
+        state.pending = false;
         return false;
       }
     }

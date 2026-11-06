@@ -80,3 +80,7 @@ curl -fsS http://localhost/version.json
 仓库 Settings 中实际维护 main 分支保护、CODEOWNERS 写权限，以及 staging/production 环境的 Secrets 和生产 Required reviewers。三个环境 Secrets 分别是 DEPLOY_HOST、DEPLOY_KEY、DEPLOY_KNOWN_HOSTS；服务器重装后须核实新主机指纹并恢复对应公钥。工作流文件不会自动创建这些 GitHub 设置，也不会自动安装全新服务器的 Docker/Compose。
 
 Actions 按环境串行部署，服务器再用 flock 防止并发发布。正式集成测试另外使用独立环境，避免其他模块部署导致误报；共享环境手工联调仍须约定暂停部署的窗口。这些机制不会让服务升级全程无中断。
+
+## 自动版本登记（候选变更，合并发布后生效）
+
+Production成功部署后运行 scripts/publish-release.py，创建 `prod-<完整发布编号>` Git tag 和 GitHub Release，并从仓库历史自动生成变更说明。目标SHA取自发布包，需再次核对成功main CI；不以工作流当前HEAD替代制品版本。重复执行不会移动tag或重复创建Release；已有同名tag指向其他对象时失败。回滚不创建新版本tag。登记失败不会自动撤销已经完成的部署，应检查实际版本后重试登记。

@@ -18,6 +18,9 @@ permissions:
   actions: read
 jobs:
   release:
+    permissions:
+      contents: write
+      actions: read
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     environment:
@@ -59,3 +62,13 @@ jobs:
             test "${#bundles[@]}" = 1
             bash scripts/remote-release.sh deploy "${bundles[0]}"
           fi
+      - name: Record successful production version
+        if: inputs.action == 'deploy'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          bundles=(artifacts/release-*.tar.gz)
+          test "${#bundles[@]}" = 1
+          tar -xOf "${bundles[0]}" ./release.json > /tmp/deployed-release.json
+          python3 scripts/publish-release.py /tmp/deployed-release.json

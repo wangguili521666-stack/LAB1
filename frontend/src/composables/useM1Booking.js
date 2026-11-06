@@ -1,8 +1,9 @@
 import { computed, reactive, watch, onScopeDispose } from "vue";
-import { buildSearch, defaultFilters, filterKey } from "../utils/m1.js";
+import { buildSearch, defaultFilters, filterKey, loadBookingLimit } from "../utils/m1.js";
 export function useM1Booking(api, options = {}) {
   const filters = reactive(defaultFilters());
   const state = reactive({
+    maxHours: null,
     seats: [],
     snapshot: null,
     searched: false,
@@ -48,10 +49,15 @@ export function useM1Booking(api, options = {}) {
     state.searched = false;
     if (!state.bookingPending) state.selected = null;
     let query;
+    state.searching = true;
     try {
-      query = buildSearch(filters);
+      const requested = { ...filters };
+      const maxHours = await loadBookingLimit(api);
+      if (disposed || version !== searchVersion) return false;
+      state.maxHours = maxHours;
+      query = buildSearch(requested, maxHours);
     } catch (error) {
-      state.searchError = error.message;
+      if (!disposed && version === searchVersion) { state.searching = false; state.maxHours = null; state.searchError = error.message; }
       return false;
     }
     state.searching = true;
@@ -127,6 +133,9 @@ export function useM1Booking(api, options = {}) {
     state.bookingError = "";
     state.success = "";
     try {
+      state.maxHours = await loadBookingLimit(api);
+      if (disposed) return false;
+      buildSearch({ start: selection.query.params.start_time.slice(0,16), end: selection.query.params.end_time.slice(0,16) }, state.maxHours);
       await api.book({
         seat_id: String(selection.seat.seat_id),
         start_time: selection.query.params.start_time,

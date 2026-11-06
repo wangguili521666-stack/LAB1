@@ -32,6 +32,7 @@ const deferred = () => {
 function setup(t, overrides = {}, onChange) {
   const scope = effectScope();
   const api = {
+    settings: async () => [{ setting_key: "max_booking_hours", setting_value: "4" }],
     bookings: async () => page(),
     booking: async (id) => ({ ...record, id }),
     violations: async () => page(),
@@ -295,4 +296,13 @@ test("malformed pagination is not presented as empty success", async (t) => {
   await m.refreshBookings();
   assert.match(m.bookings.error, /格式异常/);
   assert.equal(m.bookings.loaded, false);
+});
+
+test('history rebooking uses refreshed limit and prevents duplicate writes while settings load', async t=>{
+  let limit=6,writes=0;
+  const m=setup(t,{settings:async()=>[{setting_key:'max_booking_hours',setting_value:String(limit)}],rebook:async()=>{writes++}});
+  await m.open('rebook',record.id);m.state.dialog.start='2026-11-01T09:00';m.state.dialog.end='2026-11-01T14:00';
+  const first=m.submit();assert.equal(await m.submit(),false);assert.equal(await first,true);assert.equal(writes,1);
+  limit=2;await m.open('rebook',record.id);m.state.dialog.start='2026-11-01T09:00';m.state.dialog.end='2026-11-01T12:00';
+  assert.equal(await m.submit(),false);assert.equal(writes,1);assert.match(m.state.dialog.error,/2 小时/);assert.equal(m.state.pending,false);
 });
