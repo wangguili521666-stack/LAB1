@@ -260,7 +260,7 @@ npm run dev:local
 
 - 正式入口为 `npm start`，从 `.env` 读取团队数据库、可达的 `D1_BASE_URL` 和各模块独立服务凭据，并使用真实 D1 认证。实际团队库表结构和完整服务联调仍需验证。
 - D3 已接入根目录 Compose、一键启动与统一前端代理；服务间使用 Compose 服务名通信。
-- M1/M2/M3 仍负责业务事件、提醒时机和接收人；D3 不改变它们的业务状态。当前只实现站内消息，邮件和微信渠道尚未接入。
+- M1/M2/M3 仍负责业务事件、提醒时机和接收人；D3 不改变它们的业务状态。站内消息已实现；设置 SMTP_ENABLED=true 后，M1 提醒附加邮件投递，微信未接入。配置与投递状态见 docs/operation-guide.md。
 - 可共享 D3 业务代码、迁移脚本、测试、Mock、验收页面、初始化工具、配置模板与锁文件。真实 `.env`/`.env.local`、`node_modules/`、`.local/`、`.mysql-test/` 和数据库运行数据不提交。
 - `npm test` 运行无需 MySQL 的测试；完整隔离 MySQL 测试按 D3 README 执行。不要把跳过的数据库用例计为通过。
 
@@ -328,3 +328,6 @@ npm run build
 ## GitHub CI/CD
 
 当前交付使用GitHub Actions，使用及审批/回滚说明见 [GitHub交付说明](docs/github-cicd.md)。历史CodeArts文档保留供追溯。
+
+## 最新审查
+2026-11-14 的当前代码审查、修复和限制见 [项目审查报告](docs/project-audit-2026-11-14.md)。此前报告保留为历史证据，不代表当前运行版本或当前验收状态。

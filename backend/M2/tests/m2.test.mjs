@@ -12,6 +12,7 @@ let server
 let base
 let expireOverdue
 let getPool
+let deliverLogs
 let closePool
 
 function loadEnv() {
@@ -69,6 +70,7 @@ describe('M2 教室申请与审批', { concurrency: 1 }, () => {
     const appModule = await import('../src/app.js')
     const service = await import('../src/services/applications.js')
     const db = await import('../src/db.js')
+    deliverLogs = (await import('../src/clients/d3.js')).deliverLogs
     expireOverdue = service.expireOverdue
     getPool = db.getPool
     closePool = db.closePool
@@ -79,6 +81,7 @@ describe('M2 教室申请与审批', { concurrency: 1 }, () => {
 
   beforeEach(async () => {
     stub.reset()
+    await getPool().query('DELETE FROM m2_audit_outbox')
     await getPool().query('DELETE FROM application_approvals')
     await getPool().query('DELETE FROM classroom_applications')
   })
@@ -107,8 +110,37 @@ describe('M2 教室申请与审批', { concurrency: 1 }, () => {
     assert.equal(created.json.data.applicant_id, '2')
     assert.ok(created.json.data.reservation_id)
     assert.equal(stub.reservations.at(-1).status, 'HELD')
+    await deliverLogs()
     assert.equal(stub.logs.at(-1).action, 'APPLICATION_CREATE')
     assert.equal(stub.logs.at(-1).result, 'SUCCESS')
+  })
+
+  test('M2-AUDIT-RETRY: outage retains event; reconnect delivers once', async () => {
+    const created = await apply(userToken(2))
+    assert.equal(created.status, 201)
+    const original = process.env.D3_BASE_URL
+    process.env.D3_BASE_URL = 'http://127.0.0.1:1'
+    try { await deliverLogs() } finally { process.env.D3_BASE_URL = original }
+    const [[before]] = await getPool().query('SELECT COUNT(*) n FROM m2_audit_outbox WHERE sent=0')
+    assert.equal(Number(before.n), 1)
+    await closePool()
+    await deliverLogs()
+    await deliverLogs()
+    assert.equal(stub.logs.length, 1)
+    assert.equal(stub.logs[0].action, 'APPLICATION_CREATE')
+    assert.ok(stub.logs[0].source_event_id)
+    const [[after]] = await getPool().query('SELECT COUNT(*) n FROM m2_audit_outbox WHERE sent=0')
+    assert.equal(Number(after.n), 0)
+  })
+
+  test('expired application cannot be approved before scheduler runs', async () => {
+    const created = await apply(userToken(2))
+    assert.equal(created.status, 201)
+    await getPool().query("UPDATE classroom_applications SET approval_deadline='2000-01-01 00:00:00' WHERE id=?", [created.json.data.id])
+    const result = await api('POST', `/api/m2/applications/${created.json.data.id}/approve`, {token:userToken(4),body:{comment:'测试'}})
+    assert.equal(result.status, 409)
+    const [[row]] = await getPool().query('SELECT status FROM classroom_applications WHERE id=?',[created.json.data.id])
+    assert.equal(row.status,'PENDING_L1')
   })
 
   test('M2-03 与已有占用冲突时申请失败且不保留记录', async () => {

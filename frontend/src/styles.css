@@ -939,6 +939,7 @@ a:focus-visible {
     margin-top: 3px;
   }
   .sidebar nav {
+    flex-wrap: wrap;
     display: flex;
     margin-top: 15px;
     gap: 5px;

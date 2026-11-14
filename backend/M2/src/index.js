@@ -3,6 +3,9 @@ import { closePool } from './db.js'
 import { config } from './config.js'
 import { expireOverdue } from './services/applications.js'
 
+import { deliverLogs } from './clients/d3.js'
+const auditTimer = setInterval(() => deliverLogs().catch(() => console.error('M2_AUDIT_RETRY')), 2000)
+auditTimer.unref()
 const app = createApp()
 const server = app.listen(config.port, () => {
   console.log(`M2 服务已启动：http://localhost:${config.port}`)
@@ -17,6 +20,7 @@ if (process.env.M2_DISABLE_SCHEDULER !== '1') {
 }
 
 function shutdown() {
+  clearInterval(auditTimer)
   if (timer) clearInterval(timer)
   server.close(() => { closePool().catch(() => { process.exitCode = 1 }) })
 }

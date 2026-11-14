@@ -868,10 +868,12 @@
       "implementation": [
         "backend/D2/src/occupancy.js",
         "backend/D2/src/maintenance.js",
-        "backend/D2/src/app.js"
+        "backend/D2/src/app.js",
+        "frontend/src/views/ResourceAdmin.vue"
       ],
       "verification": [
-        "backend/D2/tests/integration/resources.test.js"
+        "backend/D2/tests/integration/resources.test.js",
+        "frontend/tests/resource-admin-browser.cjs"
       ],
       "command": "npm run test:all",
       "method": "对应D2编号的真实数据库测试；检查响应、资源状态、冲突与权限断言",
@@ -888,10 +890,12 @@
       "implementation": [
         "backend/D2/src/occupancy.js",
         "backend/D2/src/maintenance.js",
-        "backend/D2/src/app.js"
+        "backend/D2/src/app.js",
+        "frontend/src/views/ResourceAdmin.vue"
       ],
       "verification": [
-        "backend/D2/tests/integration/resources.test.js"
+        "backend/D2/tests/integration/resources.test.js",
+        "frontend/tests/resource-admin-browser.cjs"
       ],
       "command": "npm run test:all",
       "method": "对应D2编号的真实数据库测试；检查响应、资源状态、冲突与权限断言",
@@ -1979,17 +1983,19 @@
       "source": "docs/requirements/demands.md",
       "owner": "M2",
       "implementation": [
-        "backend/M2/src/services/applications.js",
-        "backend/M2/src/routes/m2.js"
+        "backend/M2/src/clients/d3.js",
+        "backend/M2/migrations/002_audit_outbox.sql",
+        "backend/M2/src/services/applications.js"
       ],
       "verification": [
         "backend/M2/tests/m2.test.mjs",
         "scripts/integration.mjs"
       ],
       "command": "npm run test:all",
-      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
-      "status": "deferred",
-      "gap": "尚未实现：M2 当前仅记录审计调用失败；外部通知当前明确不支持。需后续实现和真实故障恢复/渠道送达测试。"
+      "method": "真实MySQL保存审计事件，D3连接失败后保持待投递，重建连接再投递并验证不会重复处理已完成记录。",
+      "status": "partial",
+      "gap": "已实现持久队列及数据库重连后恢复回归；最终结果见本次报告，真实进程崩溃/网络不确定窗口仍需演练。",
+      "evidence": "docs/project-audit-2026-11-14.md"
     },
     {
       "id": "CHANNEL-EXTERNAL",
@@ -1998,19 +2004,18 @@
       "source": "docs/requirements/demands.md",
       "owner": "D3",
       "implementation": [
+        "backend/D3/src/email.js",
         "backend/D3/src/service.js",
-        "backend/D3/src/stores/mysql.js"
+        "backend/D3/migrations/002_email_jobs.sql"
       ],
       "verification": [
-        "backend/D3/test/api.test.js",
-        "backend/D3/test/persistence.test.js",
-        "backend/D3/test/acceptance.test.js",
-        "backend/D3/test/migration.test.js"
+        "backend/D3/test/email.test.js"
       ],
       "command": "npm run test:all",
-      "method": "按验收条件构造成功、拒绝与边界情形，核对实际响应和数据；缺少自动断言则补充，不能以文件存在认定通过。",
-      "status": "deferred",
-      "gap": "尚未实现：M2 当前仅记录审计调用失败；外部通知当前明确不支持。需后续实现和真实故障恢复/渠道送达测试。"
+      "method": "检查时间边界、接收人及签到状态；用真实MySQL验证队列原子性、去重与连接重建后保留。收件箱验收需另行记录。",
+      "status": "partial",
+      "gap": "邮件代码、队列、时间窗口及去重已接入；当前仓库尚无三类真实邮件收件箱验收证据。微信为未实现替代渠道，任务书只要求其中一种。",
+      "evidence": "docs/project-audit-2026-11-14.md"
     },
     {
       "id": "QUALITY-TRACE",

@@ -58,6 +58,7 @@ services:
       M3_BASE_URL: http://m3:3003
       D3_BASE_URL: http://d3:3006
       D3_SERVICE_TOKEN: ${D3_D1_SERVICE_TOKEN:?}
+      D1_D3_SERVICE_TOKEN: ${D1_D3_SERVICE_TOKEN:-}
       D1_M2_SERVICE_TOKEN: ${D1_M2_SERVICE_TOKEN:?}
       JWT_EXPIRES_IN: "86400"
     healthcheck:
@@ -117,6 +118,7 @@ services:
       D3_BASE_URL: http://d3:3006
       D2_SERVICE_TOKEN: ${D2_M1_SERVICE_TOKEN:?}
       D3_SERVICE_TOKEN: ${D3_M1_SERVICE_TOKEN:?}
+      M1_D3_SERVICE_TOKEN: ${M1_D3_SERVICE_TOKEN:-}
       CHECKIN_SECRET: ${CHECKIN_SECRET:?}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/m1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -185,6 +187,14 @@ services:
       mysql:
         condition: service_healthy
     environment:
+      SMTP_ENABLED: ${SMTP_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-smtp.qq.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      D1_D3_SERVICE_TOKEN: ${D1_D3_SERVICE_TOKEN:-}
+      M1_D3_SERVICE_TOKEN: ${M1_D3_SERVICE_TOKEN:-}
+      M1_BASE_URL: http://m1:3001
       HOST: 0.0.0.0
       PORT: "3006"
       DB_HOST: mysql

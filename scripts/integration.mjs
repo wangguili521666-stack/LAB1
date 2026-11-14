@@ -330,6 +330,13 @@ if (process.env.TEST_LOCAL) {
     "PASS daily check-in, ownership, reminder delivery, no-show worker and D2 release",
   );
 }
+for (const path of ['/api/m1/bookings/me','/api/m1/violations/me','/api/m3/tickets/me']) {
+  const result = await api(path, admin.token);
+  assert.ok(Number.isSafeInteger(result.total), path + ': total must be a number');
+  assert.equal(result.page, 1);
+  assert.ok(Array.isArray(result.items));
+}
+console.log('PASS numeric pagination for bookings, violations and repairs');
 await new Promise((r) => setTimeout(r, 6000));
 const logs = await api("/api/d3/admin/logs?page_size=100", admin.token);
 for (const module of ["M1", "M2", "M3", "D2"])

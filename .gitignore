@@ -21,3 +21,9 @@ artifacts/
 
 # Generated release metadata
 deploy/release.json
+
+# Python caches and private local overrides
+__pycache__/
+*.py[cod]
+.env.*
+!.env.example

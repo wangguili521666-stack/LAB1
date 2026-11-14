@@ -1,6 +1,6 @@
 # 需求追踪清单
 
-验收标准、逐条缺口及操作方法以 [traceability.json](traceability.json) 为准。partial表示已审查但未完整验收，不能按完成统计。
+验收标准、逐条缺口和证据以 [traceability.json](traceability.json) 为准。partial 不等于全部完成。
 
 |编号|需求|状态|实现|验证|
 |---|---|---|---|---|
@@ -48,8 +48,8 @@
 |D1-11|用户修改密码|partial|backend/D1/src/routes/auth.js, backend/D1/src/routes/users.js, backend/D1/src/routes/rbac.js, backend/D1/src/routes/integration.js|scripts/integration.mjs|
 |D1-12|用户查询个人预约与申请记录|partial|backend/D1/src/routes/auth.js, backend/D1/src/routes/users.js, backend/D1/src/routes/rbac.js, backend/D1/src/routes/integration.js|scripts/integration.mjs|
 |D1-13|禁用用户尝试登录|partial|backend/D1/src/routes/auth.js, backend/D1/src/routes/users.js, backend/D1/src/routes/rbac.js, backend/D1/src/routes/integration.js|scripts/integration.mjs|
-|D2-01|管理员新增教室|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js|backend/D2/tests/integration/resources.test.js|
-|D2-02|管理员为教室新增座位|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js|backend/D2/tests/integration/resources.test.js|
+|D2-01|管理员新增教室|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js, frontend/src/views/ResourceAdmin.vue|backend/D2/tests/integration/resources.test.js, frontend/tests/resource-admin-browser.cjs|
+|D2-02|管理员为教室新增座位|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js, frontend/src/views/ResourceAdmin.vue|backend/D2/tests/integration/resources.test.js, frontend/tests/resource-admin-browser.cjs|
 |D2-03|查询空闲时间段的资源|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js|backend/D2/tests/integration/occupancy.test.js|
 |D2-04|查询已占用时间段的资源|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js|backend/D2/tests/integration/occupancy.test.js|
 |D2-05|同一座位发生时间重叠预约|verified|backend/D2/src/occupancy.js, backend/D2/src/maintenance.js, backend/D2/src/app.js|backend/D2/tests/integration/occupancy.test.js|
@@ -104,8 +104,8 @@
 |M3-PRIORITY|维修优先级|partial|backend/M3/src/index.js|scripts/integration.mjs, backend/M3/test/validation.test.js|
 |M3-PUBLIC-REVIEW|公开维修评价|partial|backend/M3/src/index.js|scripts/integration.mjs, backend/M3/test/validation.test.js|
 |D1-LOGOUT|退出登录|partial|backend/D1/src/routes/auth.js, backend/D1/src/routes/users.js, backend/D1/src/routes/rbac.js, backend/D1/src/routes/integration.js|scripts/integration.mjs|
-|M2-AUDIT-RETRY|审计持久化重试|deferred|backend/M2/src/services/applications.js, backend/M2/src/routes/m2.js|backend/M2/tests/m2.test.mjs, scripts/integration.mjs|
-|CHANNEL-EXTERNAL|邮件与微信实际发送|deferred|backend/D3/src/service.js, backend/D3/src/stores/mysql.js|backend/D3/test/api.test.js, backend/D3/test/persistence.test.js, backend/D3/test/acceptance.test.js, backend/D3/test/migration.test.js|
+|M2-AUDIT-RETRY|审计持久化重试|partial|backend/M2/src/clients/d3.js, backend/M2/migrations/002_audit_outbox.sql, backend/M2/src/services/applications.js|backend/M2/tests/m2.test.mjs, scripts/integration.mjs|
+|CHANNEL-EXTERNAL|邮件与微信实际发送|partial|backend/D3/src/email.js, backend/D3/src/service.js, backend/D3/migrations/002_email_jobs.sql|backend/D3/test/email.test.js|
 |QUALITY-TRACE|需求基线追踪|verified|scripts/requirements-check.mjs|scripts/requirements-check.test.mjs|
 |QUALITY-TEST|测试行为有效性|verified|scripts/mutation.mjs|scripts/mutation.mjs|
 |INFRA-SCRIPT|基础设施脚本化|verified|start.sh, docker-compose.yml, db/init/00-init-databases.sh, scripts/infra.sh|scripts/ci.sh|
