@@ -1,5 +1,5 @@
 """Exercise the real deployment script; Docker is a controlled external boundary."""
-import unittest,tempfile,pathlib,subprocess,os,json
+import unittest,tempfile,pathlib,subprocess,os,json,tarfile,io,hashlib
 SCRIPT=pathlib.Path(__file__).with_name('server-release.sh').resolve()
 class Releases(unittest.TestCase):
  def setUp(self):
@@ -31,4 +31,41 @@ class Releases(unittest.TestCase):
   result=self.run_script('rollback',b.name)
   self.assertEqual(result.returncode,0,result.stderr)
   self.assertEqual(controller.read_text(),'new controller')
+ def archive(self, members):
+  archive=self.root/'release.tar.gz'
+  with tarfile.open(archive,'w:gz') as t:
+   for name,body,kind in members:
+    m=tarfile.TarInfo(name);m.type=kind
+    if kind==tarfile.REGTYPE:
+     m.size=len(body);t.addfile(m,io.BytesIO(body))
+    else:
+     m.linkname='outside';t.addfile(m)
+  digest=hashlib.sha256(archive.read_bytes()).hexdigest()
+  pathlib.Path(str(archive)+'.sha256').write_text(digest+'  '+archive.name+'\n')
+  return archive
+ def test_streamed_deploy_extracts_and_records_success(self):
+  version='c'*40+'-1-1'
+  files={'release.json':json.dumps({'release':version,'schema':'same'}).encode(),
+         'compose.json':b'{}','server-release.sh':SCRIPT.read_bytes(),
+         'db/init/seed.sql':b'SELECT 1;', 'images.tar':b'image data'*10000}
+  archive=self.archive([(name,body,tarfile.REGTYPE) for name,body in files.items()])
+  result=self.run_script('deploy',str(archive))
+  self.assertEqual(result.returncode,0,result.stderr)
+  next=self.root/'releases'/version
+  self.assertEqual((self.root/'current').resolve(),next)
+  for name,body in files.items():self.assertEqual((next/name).read_bytes(),body)
+  self.assertIn('发布包解压',result.stdout)
+  self.assertIn('服务 frontend 就绪',result.stdout)
+ def test_unsafe_late_archive_member_cleans_stage_without_starting_services(self):
+  for name,kind in [('../escape',tarfile.REGTYPE),('/absolute',tarfile.REGTYPE),
+                    ('link',tarfile.SYMTYPE),('hardlink',tarfile.LNKTYPE),('pipe',tarfile.FIFOTYPE)]:
+   with self.subTest(name=name):
+    archive=self.archive([('safe',b'partial extraction',tarfile.REGTYPE),(name,b'bad',kind)])
+    result=self.run_script('deploy',str(archive))
+    self.assertNotEqual(result.returncode,0)
+    self.assertIn('非法归档成员',result.stderr)
+    self.assertEqual(list((self.root/'releases').iterdir()),[])
+    self.assertFalse((self.root/'docker.calls').exists())
+    self.assertFalse((self.root/'current').exists())
+    self.assertFalse((self.root/'releases'/'escape').exists())
 if __name__=='__main__':unittest.main()

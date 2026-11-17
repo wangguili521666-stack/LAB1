@@ -11,12 +11,16 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/*/package-lock.json
       - run: python3 scripts/release_test.py
       - run: python3 scripts/publish_release_test.py
       - run: npm run test:all
@@ -26,25 +30,20 @@ jobs:
           name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: test-results/
           retention-days: 14
-  bundle:
-    needs: quality
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: node scripts/release-build.mjs
+      # Keep packaging on the tested runner to reuse Docker layers and base images.
+      - name: Build release using tested image cache
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: node scripts/release-build.mjs
       - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           name: release-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/release-*
           compression-level: 0
           retention-days: 30
   staging:
-    needs: bundle
+    needs: quality
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     environment:
       name: staging

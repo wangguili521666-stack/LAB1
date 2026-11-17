@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 077
+# Log durations without including environment values or credentials.
+phase_started=$SECONDS
+phase_done() { printf "[deploy] %s: %ss\n" "$1" "$((SECONDS - phase_started))"; phase_started=$SECONDS; }
 ROOT=${LAB1_ROOT:-/opt/lab1}
 mkdir -p "$ROOT/releases" "$ROOT/shared"
 exec 9>"$ROOT/deploy.lock"
@@ -24,17 +27,21 @@ PY
 elif [[ "$mode" == deploy ]]; then
   archive=$(realpath "${2:?需要发布包}")
   (cd "$(dirname "$archive")"; sha256sum -c "$(basename "$archive").sha256")
+  phase_done "发布包校验"
   stage=$(mktemp -d "$ROOT/releases/.incoming.XXXXXX")
   trap 'rm -rf "${stage:-}"' EXIT
-  # Reject path traversal, links and special files before extraction.
+  # Validate each member before extracting it into the private staging directory.
+  # Stream once: getmembers() followed by extractall() decompresses large images twice.
   python3 - "$archive" "$stage" <<'PY'
 import tarfile,sys,pathlib
-with tarfile.open(sys.argv[1]) as t:
- for m in t.getmembers():
+with tarfile.open(sys.argv[1],mode='r|gz') as t:
+ for m in t:
   p=pathlib.PurePosixPath(m.name)
-  assert not p.is_absolute() and '..' not in p.parts and (m.isfile() or m.isdir()), '非法归档成员'
- t.extractall(sys.argv[2],filter='data')
+  if p.is_absolute() or '..' in p.parts or not (m.isfile() or m.isdir()):
+   raise ValueError('非法归档成员')
+  t.extract(m,sys.argv[2],filter='data')
 PY
+  phase_done "发布包解压"
   target=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["release"])' "$stage/release.json")
   [[ "$target" =~ ^[a-f0-9]{40}-[a-z0-9]+-[0-9]+$ ]] || exit 2
   next="$ROOT/releases/$target"
@@ -58,12 +65,16 @@ PY
   find "$next/db/init" -type f -exec chmod 644 {} +
   images=(mysql:8.0)
   for service in d1 d2 d3 m1 m2 m3 frontend; do images+=("lab1-$service:$target"); done
+  phase_done "发布目录准备"
   docker image inspect "${images[@]}" >/dev/null 2>&1 || docker load -i "$next/images.tar"
+  phase_done "镜像检查及加载"
 else echo '用法: server-release.sh deploy 包 | rollback 版本 | status'; exit 2; fi
 compose "$next" config --quiet
 healthy=true
+phase_started=$SECONDS
 for service in mysql d1 d2 d3 m1 m2 m3 frontend; do
   if ! compose "$next" up -d --no-deps --no-build --pull never --wait --wait-timeout 600 "$service"; then healthy=false; break; fi
+  phase_done "服务 $service 就绪"
 done
 if [[ "$healthy" != true ]]; then
   echo '发布失败；未更新当前成功版本。请检查容器和迁移状态。' >&2
