@@ -34,9 +34,9 @@ const approvalTask = reactive(useTask())
 const applyingId = ref('')
 
 const roles = computed(() => profile.value?.roles || [])
-const canApply = computed(() => roles.value.includes('TEACHER') || roles.value.includes('SYSTEM_ADMIN'))
+const canApply = computed(() => profile.value?.permissions?.includes('classroom:apply') || roles.value.includes('SYSTEM_ADMIN'))
 const canApprove = computed(
-  () => roles.value.includes('CLASSROOM_ADMIN') || roles.value.includes('SYSTEM_ADMIN'),
+  () => profile.value?.permissions?.some(p => ['classroom:approve_l1', 'classroom:approve_l2'].includes(p)) || roles.value.includes('SYSTEM_ADMIN'),
 )
 
 function defaultStart() {

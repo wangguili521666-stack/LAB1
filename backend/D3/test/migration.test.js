@@ -47,7 +47,7 @@ test('MySQL 兼容旧 CRLF 记录，不重写历史，错误校验值仍拒绝�
     assert.equal(record.checksum, checksums.checksum, '新迁移统一记录 LF 校验值')
     const [[before]] = await pool.query('SELECT COUNT(*) total FROM announcements')
     await pool.query('UPDATE d3_schema_migrations SET checksum = ? WHERE filename = ?', [checksums.legacyChecksum, record.filename])
-    assert.deepEqual(await migrate(pool), { applied: false, filename: record.filename })
+    assert.deepEqual(await migrate(pool), { applied: false, filename: '002_email_jobs.sql' })
     const [[legacy]] = await pool.query('SELECT checksum, applied_at FROM d3_schema_migrations WHERE filename = ?', [record.filename])
     assert.equal(legacy.checksum, checksums.legacyChecksum)
     assert.equal(legacy.applied_at, record.applied_at)

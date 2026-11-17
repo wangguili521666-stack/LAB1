@@ -78,3 +78,13 @@ npm run build                 # 仅前端构建，不启动平台
 | 发布回归测试 | `scripts/release_test.py` |
 
 实际运行证据和待完成事项见 [GitHub 交付验收记录](github-cicd-validation.md)。生产自动备份恢复、TLS、容量与磁盘保留策略仍需后续运维配置；首次服务器安装 Docker 和 SSH 权限仍需准备，不把应用自动发布描述为服务器从零自动安装。
+
+## 教室与座位维护
+系统管理员或拥有 resource:manage 且绑定学院的管理员登录后，进入“教室与座位”。新增教室不会自动生成座位，进入“管理座位”后逐个新增。维护或停用教室会阻止新预约，不表示删除已有预约；座位所属教室不可修改。普通用户无此入口，后台仍独立校验权限。
+
+## 邮件配置
+在部署环境私密 .env 中设置 SMTP_ENABLED=true、SMTP_HOST=smtp.qq.com、SMTP_PORT=465、SMTP_USER 和 SMTP_PASSWORD（SMTP授权码）。为 D1_D3_SERVICE_TOKEN 和 M1_D3_SERVICE_TOKEN 分别配置至少32字符随机密钥。测试/生产独立配置；本机 start.sh 会补齐服务密钥。不要提交真实授权码。生产已有shared/.env不会自动加入新变量，须在部署前配置。CI默认SMTP_ENABLED=false，不发送真实邮件。
+迁移随服务启动自动运行。d3_email_jobs中SUBMITTED仅代表SMTP接受；FAILED需排查邮箱配置或用户地址。无需重建历史通知，启用后仅发送新产生的提醒。邮件发送前检查预约状态，但无法撤回已提交邮件。
+
+## M2审计恢复
+D3故障时审计留在m2_audit_outbox；M2每2秒重试，重启后继续，D3按事件ID幂等接收。不要删除待投递记录。

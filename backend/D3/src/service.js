@@ -37,6 +37,9 @@ export class D3Service {
       if (record.payload_hash !== input.payload_hash) throw conflict()
       if (created) {
         await tx.insertRecipients(record.id, recipient_user_ids, now)
+        if (process.env.SMTP_ENABLED === 'true' && tx.enqueueEmail && input.source_module === 'M1' &&
+            ['BOOKING_REMINDER','LATE_REMINDER','NO_SHOW'].includes(input.notification_type))
+          await tx.enqueueEmail(record.id, recipient_user_ids, now)
         await tx.appendLog(this.auditRecord(ctx, 'NOTIFICATION_ACCEPT', 'NOTIFICATION', record.id, 'SUCCESS', `source_module=${ctx.service.module}`))
       }
       return { created, data: { id: record.id, deduplicated: !created, recipient_count: recipient_user_ids.length,

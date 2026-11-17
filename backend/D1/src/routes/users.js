@@ -1,3 +1,4 @@
+import { validateProfile } from '../validation.js'
 import {permissions,active,problem} from '../rbac.js'
 import { Router } from 'express'
 import { pool } from '../db.js'
@@ -54,6 +55,7 @@ router.get('/me', async (req, res, next) => {
 // 修改本人资料：PATCH /api/d1/users/me（仅昵称/邮箱/手机号）
 router.patch('/me', async (req, res, next) => {
   try {
+    validateProfile(req.body)
     const { nickname, email, phone } = req.body || {}
     const sets = []
     const params = []

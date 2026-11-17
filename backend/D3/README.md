@@ -167,3 +167,6 @@ npm run test:mysql:local -- "H:\mysql\mysql-8.0.40-winx64\bin\mysqld.exe"
 4. 在现有 Vue 应用中接入消息与公告页面，评审后整合部署、日志收集与告警。
 
 当前仅提供 IN_APP。EMAIL/WECHAT 会明确返回 CHANNEL_NOT_AVAILABLE，不能据此宣称真实发送已完成。公告管理默认 OPERATION_ADMIN/SYSTEM_ADMIN，日志查询默认 SYSTEM_ADMIN；这些首版权限及 expected_version 要求已写入契约，供团队评审。
+
+## 2026-11-14 邮件更新
+已实现 M1 提醒附加邮件任务、退避重试和发送前业务状态检查，配置见 ../../docs/operation-guide.md。显式 EMAIL 渠道请求仍不支持，原 IN_APP 响应不代表邮件已送达；微信尚未实现。此前“后续增量”是首版历史规划。

@@ -29,6 +29,7 @@ const router = createRouter({
       component: () => import('../views/Profile.vue'),
       meta: { title: '个人中心', requiresAuth: true },
     },
+    {path:'/resource-admin',component:()=>import('../views/ResourceAdmin.vue'),meta:{title:'教室与座位管理',requiresAuth:true}},
     {path:'/role-admin',component:()=>import('../views/RoleAdmin.vue'),meta:{title:'角色权限管理',requiresAuth:true}},
     {path:'/checkin-screen',component:()=>import('../views/CheckinScreen.vue'),meta:{title:'教室签到屏幕',requiresAuth:true,kiosk:true}},
     { path: '/messages', component: () => import('../views/Messages.vue'), meta: {title: '我的消息', requiresAuth: true} },

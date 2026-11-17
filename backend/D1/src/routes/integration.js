@@ -54,6 +54,16 @@ router.post(
     res.json(ok({ allowed, reason: allowed ? null : reason }));
   }),
 );
+router.get('/internal/users/:id/email', wrap(async (req, res) => {
+  const expected = Buffer.from(process.env.D1_D3_SERVICE_TOKEN || '');
+  const actual = Buffer.from(req.get('X-Service-Token') || '');
+  if (expected.length < 32 || expected.length !== actual.length || !timingSafeEqual(expected, actual))
+    return res.status(401).json(fail('UNAUTHORIZED', '服务认证失败'));
+  if (!/^[1-9]\d{0,18}$/.test(req.params.id)) return res.status(400).json(fail('VALIDATION_ERROR', 'ID无效'));
+  const [[u]] = await pool.query("SELECT email FROM users WHERE id=? AND status='ACTIVE'", [req.params.id]);
+  if (!u) return res.status(404).json(fail('NOT_FOUND', '用户不存在或未启用'));
+  res.json(ok({email: u.email || null}));
+}));
 router.use(authRequired);
 // All endpoints below re-check current database roles, rather than trusting JWT role claims.
 router.get(

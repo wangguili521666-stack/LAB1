@@ -389,7 +389,7 @@ async function tick() {
             const kind =
               delta >= 600000
                 ? "LATE_REMINDER"
-                : delta >= -900000
+                : delta >= -900000 && delta < 0
                   ? "BOOKING_REMINDER"
                   : null;
             if (kind) {

@@ -269,3 +269,7 @@ M3 新增 revision、sync_pending、maintenance_active，追踪维修同步；ev
 ## 动态角色权限补充
 
 D1 迁移 003_rbac.sql：向现有 permissions/role_permissions 幂等加入实际支持的业务动作和默认映射；rbac_lock 单行用于序列化角色授权修改和保护最后管理员；rbac_audit_outbox(id,payload,sent) 保存角色创建、权限替换、用户角色替换的稳定审计事件。历史迁移未改写。
+
+## 2026-11-14 增量
+D3: 002_email_jobs.sql 新增 d3_email_jobs，唯一键(notification_id,user_id)，持久保存投递状态、尝试次数、下次尝试时间与脱敏错误码。
+M2: 002_audit_outbox.sql 新增 m2_audit_outbox，保存完整事件快照及sent状态；D3通过source_event_id去重。历史迁移不变。

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import mysql from "mysql2/promise";
-import { randomUUID } from "node:crypto";
+import { timingSafeEqual, randomUUID } from "node:crypto";
 export const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 3306),
@@ -92,7 +92,9 @@ export async function list(table, where, args, q) {
     `SELECT * FROM ${table} WHERE ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
     [...args, p.page_size, p.offset],
   );
-  return { items, total, ...p };
+  const count = Number(total);
+  if (!Number.isSafeInteger(count) || count < 0) throw fail(500, "分页总数无效");
+  return { items, total: count, page: p.page, page_size: p.page_size };
 }
 export function appFor(module) {
   const app = express();
@@ -105,6 +107,17 @@ export function appFor(module) {
     } catch (e) {
       next(e);
     }
+  });
+  app.get(`/api/${module}/internal/bookings/:id/reminder-state`, async (req, res, next) => {
+    try {
+      const expected = Buffer.from(process.env.M1_D3_SERVICE_TOKEN || '');
+      const actual = Buffer.from(req.get('X-Service-Token') || '');
+      if (expected.length < 32 || expected.length !== actual.length || !timingSafeEqual(expected, actual)) throw fail(401, '服务认证失败');
+      id(req.params.id);
+      const booking = await one(pool, 'SELECT user_id,status,start_time,end_time,seat_id FROM seat_bookings WHERE id=?', [req.params.id]);
+      if (!booking) throw fail(404, '预约不存在');
+      res.json({code:'OK', data:booking, request_id:randomUUID()});
+    } catch(e) { next(e); }
   });
   app.use(async (req, res, next) => {
     try {

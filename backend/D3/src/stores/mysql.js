@@ -40,6 +40,10 @@ class MysqlTransaction {
     await this.connection.query('INSERT INTO d3_notification_recipients (notification_id, recipient_user_id, created_at) VALUES ?',
       [users.map(userId => [notificationId, userId, new Date(now)])])
   }
+  async enqueueEmail(notificationId, users, now) {
+    await this.connection.query('INSERT IGNORE INTO d3_email_jobs (notification_id,user_id,next_attempt_at) VALUES ?',
+      [users.map(id => [notificationId, id, new Date(now)])]);
+  }
   async getNotification(id) { return this.one('SELECT * FROM d3_notifications WHERE id = ? FOR UPDATE', [id]) }
   async invalidateNotification(id, now) {
     await this.connection.query('UPDATE d3_notifications SET invalidated_at = COALESCE(invalidated_at, ?) WHERE id = ?', [new Date(now), id])

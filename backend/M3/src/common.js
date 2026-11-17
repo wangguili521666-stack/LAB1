@@ -92,7 +92,9 @@ export async function list(table, where, args, q) {
     `SELECT * FROM ${table} WHERE ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
     [...args, p.page_size, p.offset],
   );
-  return { items, total, ...p };
+  const count = Number(total);
+  if (!Number.isSafeInteger(count) || count < 0) throw fail(500, "分页总数无效");
+  return { items, total: count, page: p.page, page_size: p.page_size };
 }
 export function appFor(module) {
   const app = express();

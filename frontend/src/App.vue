@@ -6,6 +6,7 @@ import AppIcon from './components/AppIcon.vue'
 const route = useRoute(),
   router = useRouter()
 const links = [
+  {to:'/resource-admin',name:'教室与座位',icon:'room',note:'资源维护'},
   {to:'/role-admin',name:'角色权限',icon:'user',note:'管理员配置'},
   {to:'/checkin-screen',name:'教室签到屏幕',icon:'room',note:'每日现场签到码'},
   { to: '/messages', name: '我的消息', icon: 'user', note: '查看预约提醒与通知' },
@@ -16,7 +17,7 @@ const links = [
 ]
 const identity=ref(null)
 watch(isAuthenticated,async(value)=>{identity.value=null;if(value){try{const u=await request('/api/d1/users/me');if(isAuthenticated())identity.value=u}catch{}}},{immediate:true})
-const visibleLinks=computed(()=>links.filter(l=>l.to==='/role-admin'?identity.value?.roles.includes('SYSTEM_ADMIN'):l.to==='/checkin-screen'?(identity.value?.roles.includes('SYSTEM_ADMIN')||identity.value?.permissions?.includes('checkin:display')):true))
+const visibleLinks=computed(()=>links.filter(l=>l.to==='/resource-admin'?(identity.value?.roles.includes('SYSTEM_ADMIN')||(identity.value?.permissions?.includes('resource:manage')&&identity.value?.college_id)):l.to==='/role-admin'?identity.value?.roles.includes('SYSTEM_ADMIN'):l.to==='/checkin-screen'?(identity.value?.roles.includes('SYSTEM_ADMIN')||identity.value?.permissions?.includes('checkin:display')):true))
 watch(isAuthenticated, (value) => {
   if (!value && route.meta.requiresAuth)
     router.replace({ path: '/login', query: { redirect: route.fullPath } })

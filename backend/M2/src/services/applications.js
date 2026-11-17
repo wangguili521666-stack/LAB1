@@ -172,10 +172,13 @@ export async function createApplication(userId, body, meta) {
       hold_expires_at: toIso(deadline),
     })
     reservationId = requireId(reservation?.id, '预占')
-    await getPool().query(
-      'UPDATE classroom_applications SET reservation_id = ?, updated_at = ? WHERE id = ?',
-      [reservationId, nowMysql(), id],
-    )
+    await withLocked(id, async (conn) => {
+      await conn.query(
+        'UPDATE classroom_applications SET reservation_id = ?, updated_at = ? WHERE id = ?',
+        [reservationId, nowMysql(), id],
+      )
+      await writeLog({ ...meta, userId, action: 'APPLICATION_CREATE', targetId: id, result: 'SUCCESS' }, conn)
+    })
   } catch (err) {
     if (reservationId) await ensureReleased(reservationId, 'CREATE_FAILED').catch(() => {})
     await getPool().query('DELETE FROM classroom_applications WHERE id = ? AND reservation_id IS NULL', [id])
@@ -183,7 +186,6 @@ export async function createApplication(userId, body, meta) {
     throw err
   }
 
-  await writeLog({ ...meta, userId, action: 'APPLICATION_CREATE', targetId: id, result: 'SUCCESS' })
   return formatApplication(await selectOne(getPool(), id))
 }
 
@@ -336,6 +338,7 @@ export async function decide(userId, id, decision, comment, meta) {
     if (row.status !== current.status) {
       throw new HttpError(409, 'DUPLICATE_OPERATION', '该申请已处理')
     }
+    if (String(row.approval_deadline) <= nowMysql()) throw new HttpError(409, 'INVALID_STATE', '申请已超过审批期限')
     if (decision === 'APPROVED' && row.status === 'PENDING_L2') await ensureConfirmed(row.reservation_id)
     if (decision === 'REJECTED') await ensureReleased(row.reservation_id, 'REJECTED')
 
@@ -351,14 +354,13 @@ export async function decide(userId, id, decision, comment, meta) {
       now,
       applicationId,
     ])
-  })
-
   await writeLog({
     ...meta,
     userId,
     action: decision === 'APPROVED' ? 'APPLICATION_APPROVE' : 'APPLICATION_REJECT',
     targetId: applicationId,
     result: 'SUCCESS',
+  }, conn)
   })
   return formatApplication(await selectOne(getPool(), applicationId))
 }
@@ -382,9 +384,8 @@ export async function cancelApplication(userId, id, meta) {
       `UPDATE classroom_applications SET status = 'CANCELLED', updated_at = ? WHERE id = ?`,
       [nowMysql(), applicationId],
     )
+  await writeLog({ ...meta, userId, action: 'APPLICATION_CANCEL', targetId: applicationId, result: 'SUCCESS' }, conn)
   })
-
-  await writeLog({ ...meta, userId, action: 'APPLICATION_CANCEL', targetId: applicationId, result: 'SUCCESS' })
   return formatApplication(await selectOne(getPool(), applicationId))
 }
 
@@ -413,11 +414,9 @@ async function expireOne(id, now) {
         `UPDATE classroom_applications SET status = 'REJECTED', updated_at = ? WHERE id = ?`,
         [now, id],
       )
+      await writeLog({ userId: null, action: 'APPLICATION_EXPIRE', targetId: id, result: 'SUCCESS' }, conn)
       return true
     })
-    if (changed) {
-      await writeLog({ userId: null, action: 'APPLICATION_EXPIRE', targetId: id, result: 'SUCCESS' })
-    }
     return changed
   } catch (err) {
     console.error(`申请 ${id} 超时处理失败：`, err.message)
