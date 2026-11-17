@@ -30,7 +30,7 @@ D3	公告发布、查询和操作审计	announcements、operation_logs
 - 不创建第二个独立 Vue 应用；六模块页面接入同一个 Vue Router 和统一 API 请求封装。
 5. API 与跨模块调用规则
 1. 对外 HTTP 路径统一使用 /api/{module}/...，模块名为小写 m1/m2/m3/d1/d2/d3。
-2. 采用 JSON；统一成功/错误包装、HTTP 状态码、分页字段、时间格式和 ID 序列化规则，以 contracts/openapi.yaml 为准。不得自创新的响应格式。
+2. 采用 JSON；统一成功/错误包装、HTTP 状态码、分页字段、时间格式和 ID 序列化规则，以 docs/api/common.md 及 docs/api/ 下对应模块契约为准（当前仓库未提供 contracts/openapi.yaml）。不得自创新的响应格式。
 3. 数据库 BIGINT ID 在 JSON 中以十进制字符串表示；时间使用带时区的 ISO 8601；业务时间区间统一为 [start_time, end_time)。
 4. 客户端不可信：用户 ID 从可信认证上下文提取，不采信客户端传入的操作者 ID；后台接口检查角色、资源权限和所属学院。
 5. 模块之间只能调用公开且有契约定义的 HTTP API；不得直接查询、写入其他模块拥有的表，即便共享一个 MySQL 实例。
